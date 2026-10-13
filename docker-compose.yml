@@ -25,7 +25,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     volumes:
-      - ./images:/app/images
+      - ./images:/app/images:ro
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:
