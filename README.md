@@ -18,6 +18,7 @@ Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **
 api/              API Express (Dockerfile, src/)
 db/init.sql       Schéma de la BD, exécuté au premier démarrage de Postgres
 data/cards.csv    Données des cartes du set JJK-01
+images/           Photos des cartes (WebP), montées dans le conteneur api sur /app/images
 web/aikaho-jjk/   Front React + Vite
 docker-compose.yml
 ```
