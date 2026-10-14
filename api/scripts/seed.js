@@ -31,9 +31,9 @@ try {
     await client.query('TRUNCATE cards');
     for (const card of cards) {
         await client.query(
-            `INSERT INTO cards (id, name, set_code, number, rarity, rarity_rank)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [card.id, card.name, 'JJK-01', card.number, card.rarity, card.rarity_rank]
+            `INSERT INTO cards (id, name, set_code, number, rarity, rarity_rank, image_url)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [card.id, card.name, 'JJK-01', card.number, card.rarity, card.rarity_rank, card.image_url]
         );
     }
     await client.query('COMMIT');
