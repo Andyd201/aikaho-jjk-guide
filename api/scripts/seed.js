@@ -13,12 +13,13 @@ const rows = parse(readFileSync(csvPath, 'utf8'), {
 });
 
 // 2. Pour chaque ligne : calculer rarity_rank (et planter si rareté inconnue)
-const cards = rows.map((row) => {
+const cards = rows.map((row, i) => {
+    const line = i + 2; // +1 pour l'en-tête, +1 parce que les lignes commencent à 1
     const index = RARITIES.indexOf(row.rarity);
-    if (index === -1) {
-        throw new Error(`Rareté inconnue pour ${row.id} : ${row.rarity}`);
-    }
-    return { ...row, rarity_rank: index + 1 };
+    if (index === -1) throw new Error(`Ligne ${line} (${row.id}) : rareté inconnue "${row.rarity}"`);
+    if (!row.name?.trim()) throw new Error(`Ligne ${line} (${row.id}) : nom vide`);
+    if (row.id !== `JJK01-${row.rarity}-${row.number}`) throw new Error(`Ligne ${line} : id "${row.id}" incohérent avec rareté/numéro`);
+    return { ...row, rarity_rank: index + 1, image_url: `/images/${row.image_file}` };
 });
 
 // 3. Insérer toutes les cartes dans une transaction
