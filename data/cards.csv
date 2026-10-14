@@ -1,152 +1,152 @@
 id,image_file,rarity,number,name
-JJK01-RRR-001,photo01_carte01.png,RRR,001,Sukuna
-JJK01-RRR-002,photo01_carte02.png,RRR,002,Megumi Fushiguro
-JJK01-RRR-003,photo01_carte03.png,RRR,003,Suguru Geto
-JJK01-RRR-004,photo01_carte04.png,RRR,004,Mahito
-JJK01-RRR-005,photo01_carte05.png,RRR,005,Satoru Gojo
-JJK01-RRR-006,photo01_carte06.png,RRR,006,Aoi Todo
-JJK01-R-001,photo02_carte01.png,R,001,Megumi Fushiguro
-JJK01-R-002,photo02_carte02.png,R,002,Masamichi Yaga
-JJK01-R-003,photo02_carte03.png,R,003,"Satoru Gojo, Yuji Itadori & Nobara Kugisaki"
-JJK01-R-004,photo02_carte04.png,R,004,"Maki Zenin, Panda & Toge Inumaki"
-JJK01-R-005,photo02_carte05.png,R,005,Sukuna
-JJK01-R-006,photo02_carte06.png,R,006,Suguru Geto
-JJK01-R-007,photo02_carte07.png,R,007,Kento Nanami & Satoru Gojo
-JJK01-R-008,photo02_carte08.png,R,008,"Nobara Kugisaki, Yuji Itadori, Junpei Yoshino & Megumi Fushiguro"
-JJK01-R-009,photo02_carte09.png,R,009,Yuji Itadori
-JJK01-R-010,photo02_carte10.png,R,010,Aoi Todo & Yuji Itadori
-JJK01-R-011,photo02_carte11.png,R,011,"Yoshinobu Gakuganji, Kasumi Miwa & Mechamaru"
-JJK01-R-012,photo02_carte12.png,R,012,Nobara Kugisaki & Yuji Itadori
-JJK01-R-013,photo02_carte13.png,R,013,Choso
-JJK01-R-014,photo02_carte14.png,R,014,Maki Zenin & Panda
-JJK01-R-015,photo02_carte15.png,R,015,"Megumi Fushiguro, Yuji Itadori & Nobara Kugisaki"
-JJK01-R-016,photo02_carte16.png,R,016,"Yuji Itadori, Nobara Kugisaki, Megumi Fushiguro & Satoru Gojo"
-JJK01-R-017,photo02_carte17.png,R,017,Aoi Todo
-JJK01-R-018,photo02_carte18.png,R,018,Yuji Itadori
-JJK01-R-019,photo02_carte19.png,R,019,"Yuji Itadori, Mei Mei & Ui Ui"
-JJK01-R-020,photo02_carte20.png,R,020,Yuji Itadori & Choso
-JJK01-R-021,photo02_carte21.png,R,021,Maki Zenin
-JJK01-R-022,photo02_carte22.png,R,022,"Suguru Geto, Satoru Gojo, Mimiko Hasaba & Nanako Hasaba"
-JJK01-R-023,photo02_carte23.png,R,023,Aoi Todo & Takada-chan
-JJK01-R-024,photo02_carte24.png,R,024,Yuki Tsukumo
-JJK01-SAR-001,photo03_carte01.png,SAR,001,Kento Nanami
-JJK01-SAR-002,photo03_carte02.png,SAR,002,Aoi Todo
-JJK01-SAR-003,photo03_carte03.png,SAR,003,Kasumi Miwa
-JJK01-SAR-004,photo03_carte04.png,SAR,004,Suguru Geto
-JJK01-SAR-005,photo03_carte05.png,SAR,005,Mahito
-JJK01-SAR-006,photo03_carte06.png,SAR,006,Yuta Okkotsu
-JJK01-SAR-007,photo03_carte07.png,SAR,007,Mei Mei
-JJK01-SAR-008,photo03_carte08.png,SAR,008,Jogo
-JJK01-SAR-009,photo03_carte09.png,SAR,009,Maki Zenin
-JJK01-SAR-010,photo03_carte10.png,SAR,010,Yuji Itadori
-JJK01-SAR-011,photo03_carte11.png,SAR,011,Toji Fushiguro
-JJK01-SAR-012,photo03_carte12.png,SAR,012,Hanami
-JJK01-QR-001,photo04_carte01.png,QR,001,Yuji Itadori
-JJK01-QR-002,photo04_carte02.png,QR,002,Megumi Fushiguro
-JJK01-QR-003,photo04_carte03.png,QR,003,Nobara Kugisaki
-JJK01-QR-004,photo04_carte04.png,QR,004,Satoru Gojo
-JJK01-QR-005,photo04_carte05.png,QR,005,Suguru Geto
-JJK01-QR-006,photo04_carte06.png,QR,006,Mahito
-JJK01-QR-007,photo04_carte07.png,QR,007,Maki Zenin
-JJK01-QR-008,photo04_carte08.png,QR,008,Toge Inumaki
-JJK01-QR-009,photo04_carte09.png,QR,009,Kento Nanami
-JJK01-QR-010,photo04_carte10.png,QR,010,Yuta Okkotsu
-JJK01-QR-011,photo04_carte11.png,QR,011,Junpei Yoshino
-JJK01-QR-012,photo04_carte12.png,QR,012,Sukuna
-JJK01-SE-001,photo05_carte01.png,SE,001,Yuji Itadori
-JJK01-SE-002,photo05_carte02.png,SE,002,Satoru Gojo
-JJK01-SR-001,photo06_carte01.png,SR,001,Nobara Kugisaki
-JJK01-SR-002,photo06_carte02.png,SR,002,Shoko Ieiri
-JJK01-SR-003,photo06_carte03.png,SR,003,Kasumi Miwa
-JJK01-SR-004,photo06_carte04.png,SR,004,Momo Nishimiya
-JJK01-SR-005,photo06_carte05.png,SR,005,Utahime Iori
-JJK01-SR-006,photo06_carte06.png,SR,006,Rika Orimoto
-JJK01-SR-007,photo06_carte07.png,SR,007,Manami Suda
-JJK01-SR-008,photo06_carte08.png,SR,008,Riko Amanai
-JJK01-SR-009,photo06_carte09.png,SR,009,Maki Zenin
-JJK01-SR-010,photo06_carte10.png,SR,010,Mimiko Hasaba
-JJK01-SR-011,photo06_carte11.png,SR,011,Nanako Hasaba
-JJK01-SR-012,photo06_carte12.png,SR,012,Uraume
-JJK01-SR-013,photo06_carte13.png,SR,013,Sukuna
-JJK01-SR-014,photo06_carte14.png,SR,014,Yuji Itadori
-JJK01-SR-015,photo06_carte15.png,SR,015,Toge Inumaki
-JJK01-SR-016,photo06_carte16.png,SR,016,Satoru Gojo
-JJK01-SR-017,photo06_carte17.png,SR,017,Megumi Fushiguro
-JJK01-SR-018,photo06_carte18.png,SR,018,Suguru Geto
-JJK01-SR-019,photo06_carte19.png,SR,019,Toshihisa
-JJK01-SR-020,photo06_carte20.png,SR,020,Masamichi Yaga
-JJK01-SR-021,photo06_carte21.png,SR,021,Kiyotaka Ijichi
-JJK01-SR-022,photo06_carte22.png,SR,022,Aoi Todo
-JJK01-SR-023,photo06_carte23.png,SR,023,Ui Ui
-JJK01-SR-024,photo06_carte24.png,SR,024,Noritoshi Kamo
-JJK01-TQR-001,photo07_carte01.png,TQR,001,Yuji Itadori
-JJK01-TQR-002,photo07_carte02.png,TQR,002,Sukuna
-JJK01-TQR-003,photo07_carte03.png,TQR,003,Aoi Todo
-JJK01-TQR-004,photo07_carte04.png,TQR,004,Nobara Kugisaki
-JJK01-TQR-005,photo07_carte05.png,TQR,005,Panda
-JJK01-TQR-006,photo07_carte06.png,TQR,006,Kasumi Miwa
-JJK01-TQR-007,photo07_carte07.png,TQR,007,Megumi Fushiguro
-JJK01-TQR-008,photo07_carte08.png,TQR,008,Maki Zenin
-JJK01-TQR-009,photo07_carte09.png,TQR,009,Satoru Gojo
-JJK01-TQR-010,photo07_carte10.png,TQR,010,Toji Fushiguro
-JJK01-TQR-011,photo07_carte11.png,TQR,011,Suguru Geto
-JJK01-TQR-012,photo07_carte12.png,TQR,012,Jogo
-JJK01-SSR-001,photo08_carte01.png,SSR,001,Satoru Gojo
-JJK01-SSR-002,photo08_carte02.png,SSR,002,Yuji Itadori
-JJK01-SSR-003,photo08_carte03.png,SSR,003,Nobara Kugisaki
-JJK01-SSR-004,photo08_carte04.png,SSR,004,Suguru Geto
-JJK01-SSR-005,photo08_carte05.png,SSR,005,Megumi Fushiguro
-JJK01-SSR-006,photo08_carte06.png,SSR,006,Toji Fushiguro
-JJK01-SSR-007,photo08_carte07.png,SSR,007,Yuta Okkotsu
-JJK01-SSR-008,photo08_carte08.png,SSR,008,Kento Nanami
-JJK01-SSR-009,photo08_carte09.png,SSR,009,Toge Inumaki
-JJK01-SSR-010,photo08_carte10.png,SSR,010,Kasumi Miwa
-JJK01-SSR-011,photo08_carte11.png,SSR,011,Noritoshi Kamo
-JJK01-SSR-012,photo08_carte12.png,SSR,012,Maki Zenin
-JJK01-SSR-013,photo08_carte13.png,SSR,013,Mai Zenin
-JJK01-SSR-014,photo08_carte14.png,SSR,014,Panda
-JJK01-SSR-015,photo08_carte15.png,SSR,015,Haruta Shigemo
-JJK01-SSR-016,photo08_carte16.png,SSR,016,Mechamaru
-JJK01-SSR-017,photo08_carte17.png,SSR,017,Choso
-JJK01-SSR-018,photo08_carte18.png,SSR,018,Mahito
-JJK01-SSR-019,photo08_carte19.png,SSR,019,Yuki Tsukumo
-JJK01-SSR-020,photo08_carte20.png,SSR,020,Hanami
-JJK01-SSR-021,photo08_carte21.png,SSR,021,Yu Haibara
-JJK01-SSR-022,photo08_carte22.png,SSR,022,Kokichi Muta
-JJK01-SSR-023,photo08_carte23.png,SSR,023,Larue
-JJK01-SSR-024,photo08_carte24.png,SSR,024,Jogo
-JJK01-UTR-001,photo09_carte01.png,UTR,001,Sukuna
-JJK01-UTR-002,photo09_carte02.png,UTR,002,Megumi Fushiguro
-JJK01-UTR-003,photo09_carte03.png,UTR,003,Nobara Kugisaki
-JJK01-UTR-004,photo09_carte04.png,UTR,004,Satoru Gojo
-JJK01-UTR-005,photo09_carte05.png,UTR,005,Yuta Okkotsu
-JJK01-UTR-006,photo09_carte06.png,UTR,006,Toji Fushiguro
-JJK01-UTR-007,photo09_carte07.png,UTR,007,Mechamaru
-JJK01-UTR-008,photo09_carte08.png,UTR,008,Maki Zenin
-JJK01-UTR-009,photo09_carte09.png,UTR,009,Kento Nanami
-JJK01-UTR-010,photo09_carte10.png,UTR,010,Toge Inumaki
-JJK01-UTR-011,photo09_carte11.png,UTR,011,Panda
-JJK01-UTR-012,photo09_carte12.png,UTR,012,Rika Orimoto
-JJK01-UTR-013,photo09_carte13.png,UTR,013,Kasumi Miwa
-JJK01-UTR-014,photo09_carte14.png,UTR,014,Utahime Iori
-JJK01-UTR-015,photo09_carte15.png,UTR,015,Jogo
-JJK01-UTR-016,photo09_carte16.png,UTR,016,Hanami
-JJK01-UTR-017,photo09_carte17.png,UTR,017,Dagon
-JJK01-UTR-018,photo09_carte18.png,UTR,018,Choso
-JJK01-CHR-001,photo10_carte01.png,CHR,001,Satoru Gojo
-JJK01-CHR-002,photo10_carte02.png,CHR,002,Yuji Itadori
-JJK01-CHR-003,photo10_carte03.png,CHR,003,Megumi Fushiguro
-JJK01-CHR-004,photo10_carte04.png,CHR,004,Suguru Geto
-JJK01-CHR-005,photo10_carte05.png,CHR,005,Momo Nishimiya
-JJK01-CHR-006,photo10_carte06.png,CHR,006,Maki Zenin
-JJK01-CHR-007,photo10_carte07.png,CHR,007,Panda
-JJK01-CHR-008,photo10_carte08.png,CHR,008,Toge Inumaki
-JJK01-CHR-009,photo10_carte09.png,CHR,009,Mechamaru
-JJK01-CHR-010,photo10_carte10.png,CHR,010,Choso
-JJK01-CHR-011,photo10_carte11.png,CHR,011,Eso
-JJK01-CHR-012,photo10_carte12.png,CHR,012,Kechizu
-JJK01-ACE-001,photo11_carte01.png,ACE,001,Yuta Okkotsu
-JJK01-ACE-002,photo11_carte02.png,ACE,002,Megumi Fushiguro
-JJK01-ACE-003,photo11_carte03.png,ACE,003,Maki Zenin
-JJK01-ACE-004,photo11_carte04.png,ACE,004,Suguru Geto
-JJK01-ACE-005,photo11_carte05.png,ACE,005,Suguru Geto
+JJK01-RRR-001,photo01_carte01.webp,RRR,001,Sukuna
+JJK01-RRR-002,photo01_carte02.webp,RRR,002,Megumi Fushiguro
+JJK01-RRR-003,photo01_carte03.webp,RRR,003,Suguru Geto
+JJK01-RRR-004,photo01_carte04.webp,RRR,004,Mahito
+JJK01-RRR-005,photo01_carte05.webp,RRR,005,Satoru Gojo
+JJK01-RRR-006,photo01_carte06.webp,RRR,006,Aoi Todo
+JJK01-R-001,photo02_carte01.webp,R,001,Megumi Fushiguro
+JJK01-R-002,photo02_carte02.webp,R,002,Masamichi Yaga
+JJK01-R-003,photo02_carte03.webp,R,003,"Satoru Gojo, Yuji Itadori & Nobara Kugisaki"
+JJK01-R-004,photo02_carte04.webp,R,004,"Maki Zenin, Panda & Toge Inumaki"
+JJK01-R-005,photo02_carte05.webp,R,005,Sukuna
+JJK01-R-006,photo02_carte06.webp,R,006,Suguru Geto
+JJK01-R-007,photo02_carte07.webp,R,007,Kento Nanami & Satoru Gojo
+JJK01-R-008,photo02_carte08.webp,R,008,"Nobara Kugisaki, Yuji Itadori, Junpei Yoshino & Megumi Fushiguro"
+JJK01-R-009,photo02_carte09.webp,R,009,Yuji Itadori
+JJK01-R-010,photo02_carte10.webp,R,010,Aoi Todo & Yuji Itadori
+JJK01-R-011,photo02_carte11.webp,R,011,"Yoshinobu Gakuganji, Kasumi Miwa & Mechamaru"
+JJK01-R-012,photo02_carte12.webp,R,012,Nobara Kugisaki & Yuji Itadori
+JJK01-R-013,photo02_carte13.webp,R,013,Choso
+JJK01-R-014,photo02_carte14.webp,R,014,Maki Zenin & Panda
+JJK01-R-015,photo02_carte15.webp,R,015,"Megumi Fushiguro, Yuji Itadori & Nobara Kugisaki"
+JJK01-R-016,photo02_carte16.webp,R,016,"Yuji Itadori, Nobara Kugisaki, Megumi Fushiguro & Satoru Gojo"
+JJK01-R-017,photo02_carte17.webp,R,017,Aoi Todo
+JJK01-R-018,photo02_carte18.webp,R,018,Yuji Itadori
+JJK01-R-019,photo02_carte19.webp,R,019,"Yuji Itadori, Mei Mei & Ui Ui"
+JJK01-R-020,photo02_carte20.webp,R,020,Yuji Itadori & Choso
+JJK01-R-021,photo02_carte21.webp,R,021,Maki Zenin
+JJK01-R-022,photo02_carte22.webp,R,022,"Suguru Geto, Satoru Gojo, Mimiko Hasaba & Nanako Hasaba"
+JJK01-R-023,photo02_carte23.webp,R,023,Aoi Todo & Takada-chan
+JJK01-R-024,photo02_carte24.webp,R,024,Yuki Tsukumo
+JJK01-SAR-001,photo03_carte01.webp,SAR,001,Kento Nanami
+JJK01-SAR-002,photo03_carte02.webp,SAR,002,Aoi Todo
+JJK01-SAR-003,photo03_carte03.webp,SAR,003,Kasumi Miwa
+JJK01-SAR-004,photo03_carte04.webp,SAR,004,Suguru Geto
+JJK01-SAR-005,photo03_carte05.webp,SAR,005,Mahito
+JJK01-SAR-006,photo03_carte06.webp,SAR,006,Yuta Okkotsu
+JJK01-SAR-007,photo03_carte07.webp,SAR,007,Mei Mei
+JJK01-SAR-008,photo03_carte08.webp,SAR,008,Jogo
+JJK01-SAR-009,photo03_carte09.webp,SAR,009,Maki Zenin
+JJK01-SAR-010,photo03_carte10.webp,SAR,010,Yuji Itadori
+JJK01-SAR-011,photo03_carte11.webp,SAR,011,Toji Fushiguro
+JJK01-SAR-012,photo03_carte12.webp,SAR,012,Hanami
+JJK01-QR-001,photo04_carte01.webp,QR,001,Yuji Itadori
+JJK01-QR-002,photo04_carte02.webp,QR,002,Megumi Fushiguro
+JJK01-QR-003,photo04_carte03.webp,QR,003,Nobara Kugisaki
+JJK01-QR-004,photo04_carte04.webp,QR,004,Satoru Gojo
+JJK01-QR-005,photo04_carte05.webp,QR,005,Suguru Geto
+JJK01-QR-006,photo04_carte06.webp,QR,006,Mahito
+JJK01-QR-007,photo04_carte07.webp,QR,007,Maki Zenin
+JJK01-QR-008,photo04_carte08.webp,QR,008,Toge Inumaki
+JJK01-QR-009,photo04_carte09.webp,QR,009,Kento Nanami
+JJK01-QR-010,photo04_carte10.webp,QR,010,Yuta Okkotsu
+JJK01-QR-011,photo04_carte11.webp,QR,011,Junpei Yoshino
+JJK01-QR-012,photo04_carte12.webp,QR,012,Sukuna
+JJK01-SE-001,photo05_carte01.webp,SE,001,Yuji Itadori
+JJK01-SE-002,photo05_carte02.webp,SE,002,Satoru Gojo
+JJK01-SR-001,photo06_carte01.webp,SR,001,Nobara Kugisaki
+JJK01-SR-002,photo06_carte02.webp,SR,002,Shoko Ieiri
+JJK01-SR-003,photo06_carte03.webp,SR,003,Kasumi Miwa
+JJK01-SR-004,photo06_carte04.webp,SR,004,Momo Nishimiya
+JJK01-SR-005,photo06_carte05.webp,SR,005,Utahime Iori
+JJK01-SR-006,photo06_carte06.webp,SR,006,Rika Orimoto
+JJK01-SR-007,photo06_carte07.webp,SR,007,Manami Suda
+JJK01-SR-008,photo06_carte08.webp,SR,008,Riko Amanai
+JJK01-SR-009,photo06_carte09.webp,SR,009,Maki Zenin
+JJK01-SR-010,photo06_carte10.webp,SR,010,Mimiko Hasaba
+JJK01-SR-011,photo06_carte11.webp,SR,011,Nanako Hasaba
+JJK01-SR-012,photo06_carte12.webp,SR,012,Uraume
+JJK01-SR-013,photo06_carte13.webp,SR,013,Sukuna
+JJK01-SR-014,photo06_carte14.webp,SR,014,Yuji Itadori
+JJK01-SR-015,photo06_carte15.webp,SR,015,Toge Inumaki
+JJK01-SR-016,photo06_carte16.webp,SR,016,Satoru Gojo
+JJK01-SR-017,photo06_carte17.webp,SR,017,Megumi Fushiguro
+JJK01-SR-018,photo06_carte18.webp,SR,018,Suguru Geto
+JJK01-SR-019,photo06_carte19.webp,SR,019,Toshihisa
+JJK01-SR-020,photo06_carte20.webp,SR,020,Masamichi Yaga
+JJK01-SR-021,photo06_carte21.webp,SR,021,Kiyotaka Ijichi
+JJK01-SR-022,photo06_carte22.webp,SR,022,Aoi Todo
+JJK01-SR-023,photo06_carte23.webp,SR,023,Ui Ui
+JJK01-SR-024,photo06_carte24.webp,SR,024,Noritoshi Kamo
+JJK01-TQR-001,photo07_carte01.webp,TQR,001,Yuji Itadori
+JJK01-TQR-002,photo07_carte02.webp,TQR,002,Sukuna
+JJK01-TQR-003,photo07_carte03.webp,TQR,003,Aoi Todo
+JJK01-TQR-004,photo07_carte04.webp,TQR,004,Nobara Kugisaki
+JJK01-TQR-005,photo07_carte05.webp,TQR,005,Panda
+JJK01-TQR-006,photo07_carte06.webp,TQR,006,Kasumi Miwa
+JJK01-TQR-007,photo07_carte07.webp,TQR,007,Megumi Fushiguro
+JJK01-TQR-008,photo07_carte08.webp,TQR,008,Maki Zenin
+JJK01-TQR-009,photo07_carte09.webp,TQR,009,Satoru Gojo
+JJK01-TQR-010,photo07_carte10.webp,TQR,010,Toji Fushiguro
+JJK01-TQR-011,photo07_carte11.webp,TQR,011,Suguru Geto
+JJK01-TQR-012,photo07_carte12.webp,TQR,012,Jogo
+JJK01-SSR-001,photo08_carte01.webp,SSR,001,Satoru Gojo
+JJK01-SSR-002,photo08_carte02.webp,SSR,002,Yuji Itadori
+JJK01-SSR-003,photo08_carte03.webp,SSR,003,Nobara Kugisaki
+JJK01-SSR-004,photo08_carte04.webp,SSR,004,Suguru Geto
+JJK01-SSR-005,photo08_carte05.webp,SSR,005,Megumi Fushiguro
+JJK01-SSR-006,photo08_carte06.webp,SSR,006,Toji Fushiguro
+JJK01-SSR-007,photo08_carte07.webp,SSR,007,Yuta Okkotsu
+JJK01-SSR-008,photo08_carte08.webp,SSR,008,Kento Nanami
+JJK01-SSR-009,photo08_carte09.webp,SSR,009,Toge Inumaki
+JJK01-SSR-010,photo08_carte10.webp,SSR,010,Kasumi Miwa
+JJK01-SSR-011,photo08_carte11.webp,SSR,011,Noritoshi Kamo
+JJK01-SSR-012,photo08_carte12.webp,SSR,012,Maki Zenin
+JJK01-SSR-013,photo08_carte13.webp,SSR,013,Mai Zenin
+JJK01-SSR-014,photo08_carte14.webp,SSR,014,Panda
+JJK01-SSR-015,photo08_carte15.webp,SSR,015,Haruta Shigemo
+JJK01-SSR-016,photo08_carte16.webp,SSR,016,Mechamaru
+JJK01-SSR-017,photo08_carte17.webp,SSR,017,Choso
+JJK01-SSR-018,photo08_carte18.webp,SSR,018,Mahito
+JJK01-SSR-019,photo08_carte19.webp,SSR,019,Yuki Tsukumo
+JJK01-SSR-020,photo08_carte20.webp,SSR,020,Hanami
+JJK01-SSR-021,photo08_carte21.webp,SSR,021,Yu Haibara
+JJK01-SSR-022,photo08_carte22.webp,SSR,022,Kokichi Muta
+JJK01-SSR-023,photo08_carte23.webp,SSR,023,Larue
+JJK01-SSR-024,photo08_carte24.webp,SSR,024,Jogo
+JJK01-UTR-001,photo09_carte01.webp,UTR,001,Sukuna
+JJK01-UTR-002,photo09_carte02.webp,UTR,002,Megumi Fushiguro
+JJK01-UTR-003,photo09_carte03.webp,UTR,003,Nobara Kugisaki
+JJK01-UTR-004,photo09_carte04.webp,UTR,004,Satoru Gojo
+JJK01-UTR-005,photo09_carte05.webp,UTR,005,Yuta Okkotsu
+JJK01-UTR-006,photo09_carte06.webp,UTR,006,Toji Fushiguro
+JJK01-UTR-007,photo09_carte07.webp,UTR,007,Mechamaru
+JJK01-UTR-008,photo09_carte08.webp,UTR,008,Maki Zenin
+JJK01-UTR-009,photo09_carte09.webp,UTR,009,Kento Nanami
+JJK01-UTR-010,photo09_carte10.webp,UTR,010,Toge Inumaki
+JJK01-UTR-011,photo09_carte11.webp,UTR,011,Panda
+JJK01-UTR-012,photo09_carte12.webp,UTR,012,Rika Orimoto
+JJK01-UTR-013,photo09_carte13.webp,UTR,013,Kasumi Miwa
+JJK01-UTR-014,photo09_carte14.webp,UTR,014,Utahime Iori
+JJK01-UTR-015,photo09_carte15.webp,UTR,015,Jogo
+JJK01-UTR-016,photo09_carte16.webp,UTR,016,Hanami
+JJK01-UTR-017,photo09_carte17.webp,UTR,017,Dagon
+JJK01-UTR-018,photo09_carte18.webp,UTR,018,Choso
+JJK01-CHR-001,photo10_carte01.webp,CHR,001,Satoru Gojo
+JJK01-CHR-002,photo10_carte02.webp,CHR,002,Yuji Itadori
+JJK01-CHR-003,photo10_carte03.webp,CHR,003,Megumi Fushiguro
+JJK01-CHR-004,photo10_carte04.webp,CHR,004,Suguru Geto
+JJK01-CHR-005,photo10_carte05.webp,CHR,005,Momo Nishimiya
+JJK01-CHR-006,photo10_carte06.webp,CHR,006,Maki Zenin
+JJK01-CHR-007,photo10_carte07.webp,CHR,007,Panda
+JJK01-CHR-008,photo10_carte08.webp,CHR,008,Toge Inumaki
+JJK01-CHR-009,photo10_carte09.webp,CHR,009,Mechamaru
+JJK01-CHR-010,photo10_carte10.webp,CHR,010,Choso
+JJK01-CHR-011,photo10_carte11.webp,CHR,011,Eso
+JJK01-CHR-012,photo10_carte12.webp,CHR,012,Kechizu
+JJK01-ACE-001,photo11_carte01.webp,ACE,001,Yuta Okkotsu
+JJK01-ACE-002,photo11_carte02.webp,ACE,002,Megumi Fushiguro
+JJK01-ACE-003,photo11_carte03.webp,ACE,003,Maki Zenin
+JJK01-ACE-004,photo11_carte04.webp,ACE,004,Suguru Geto
+JJK01-ACE-005,photo11_carte05.webp,ACE,005,Suguru Geto
