@@ -1,6 +1,6 @@
 # Aikaho JJK Card Guide
 
-Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **JJK-01** (~150 cartes) : grille du set, fiche par carte, recherche et filtre par rareté.
+Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **JJK-01** (151 cartes) : grille du set, fiche par carte, recherche et filtre par rareté.
 
 ## Stack
 
@@ -17,7 +17,7 @@ Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **
 ```
 api/              API Express (Dockerfile, src/)
 db/init.sql       Schéma de la BD, exécuté au premier démarrage de Postgres
-data/cards.csv    Données des cartes du set JJK-01
+data/cards.csv    Données des cartes du set JJK-01 (id,image_file,rarity,number,name)
 images/           Photos des cartes (WebP), montées dans le conteneur api sur /app/images
 web/aikaho-jjk/   Front React + Vite
 docker-compose.yml
@@ -77,18 +77,18 @@ Table `cards` :
 
 | Colonne | Type | Notes |
 |---|---|---|
-| `id` | serial | Clé primaire |
+| `id` | text | Clé primaire, vient du CSV (ex. `JJK01-SSR-001`) |
 | `name` | text | |
 | `set_code` | text | ex. `JJK-01` |
-| `number` | text | Numéro dans le set ; `UNIQUE(set_code, number)` |
-| `rarity` | text | ex. `SGR`, `SSR`, `R` |
-| `rarity_rank` | int | 1 (la plus rare) à 17 (la plus commune) |
+| `number` | text | Numéro dans la rareté (recommence à `001` pour chaque rareté) |
+| `rarity` | text | Une des 11 raretés (contrainte `CHECK`) |
+| `rarity_rank` | int | 1 (la plus rare) à 11 (la plus commune) |
 | `description` | text | Optionnel |
 | `image_url` | text | Optionnel |
 | `created_at` | timestamptz | Rempli automatiquement |
 
-Ordre des raretés (`rarity_rank` 1 → 17) :
-SGR, LGR, LNR, XP, NR, CR, SSP, SP, MR, AR, QR, OR, HR, UR, SSR, SR, R
+Ordre des raretés (`rarity_rank` 1 → 11) :
+ACE, CHR, UTR, SE, TQR, SAR, QR, SSR, SR, RRR, R
 
 > ⚠️ `db/init.sql` n'est exécuté que si le volume de données est **vide**. Après une modification du schéma, repartir à neuf avec `docker compose down -v` (efface les données).
 
@@ -97,9 +97,9 @@ SGR, LGR, LNR, XP, NR, CR, SSP, SP, MR, AR, QR, OR, HR, UR, SSR, SR, R
 | Route | Statut |
 |---|---|
 | `GET /health` | ✅ Disponible |
-| `GET /cards?search=&rarity=` | 🚧 Sprint 1 : recherche partielle sur le nom, filtre multi-rareté (`rarity=SGR,SSR`), tri par numéro |
+| `GET /cards?search=&rarity=` | 🚧 Sprint 1 : recherche partielle sur le nom, filtre multi-rareté (`rarity=ACE,CHR`), tri par rareté puis numéro |
 | `GET /cards/:id` | 🚧 Sprint 1 : `404` si la carte n'existe pas |
-| `GET /rarities` | 🚧 Sprint 1 : les 17 raretés dans l'ordre |
+| `GET /rarities` | 🚧 Sprint 1 : les 11 raretés dans l'ordre |
 | `/images` | 🚧 Sprint 1 : photos des cartes (WebP ~800 px) servies en statique |
 
 ## Dépannage
