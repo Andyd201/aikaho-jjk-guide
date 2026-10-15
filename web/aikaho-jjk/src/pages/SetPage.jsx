@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchCards } from "../api.js";
 import CardGrid from "../components/CardGrid.jsx";
+import EyesightBanner from "../components/EyesightBanner.jsx";
 
 function SetPage() {
   const [cards, setCards] = useState([]);
@@ -26,6 +27,7 @@ function SetPage() {
   return (
     <main>
       <h1>Aikaho JJK-01 · Card Guide</h1>
+      <EyesightBanner />
       <p>{cards.length} cartes</p>
       <CardGrid cards={cards} />
     </main>

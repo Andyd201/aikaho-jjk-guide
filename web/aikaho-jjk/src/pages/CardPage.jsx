@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { API_URL, fetchCard } from "../api.js";
+import EyesightBanner from "../components/EyesightBanner.jsx";
 
 function CardPage() {
   const { id } = useParams();
@@ -43,6 +44,7 @@ function CardPage() {
       <p>
         {card.set_code} · n° {card.number} · <span className="rarity">{card.rarity}</span>
       </p>
+      <EyesightBanner cardId={card.id} />
     </main>
   );
 }
