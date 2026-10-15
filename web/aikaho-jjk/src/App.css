@@ -29,3 +29,28 @@
   gap: 8px 16px;
   margin: 16px 0;
 }
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.search-bar {
+  max-width: 320px;
+  padding: 6px 8px;
+  font-size: 1rem;
+}
+
+.rarity-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Bouton actif : on se sert de aria-pressed comme sélecteur, pas d'une classe en plus */
+.rarity-filter button[aria-pressed="true"] {
+  background: #222;
+  color: #fff;
+}
