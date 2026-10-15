@@ -1,46 +1,179 @@
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 16px 80px;
 }
 
-.card-tile img {
-  width: 100%;
-  height: auto;
-}
-.card-tile {
-  color: inherit;
-  text-decoration: none;
+.status {
+  color: var(--muted);
+  text-align: center;
+  padding: 64px 0;
 }
 
-/* Les photos font 197 px : au-delà de ~400 px elles deviennent floues */
-.card-page img {
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--crimson);
+}
+
+/* ---------- Rareté : 4 paliers de couleur, réutilisés partout via data-rarity ---------- */
+
+[data-rarity] {
+  --tier: var(--muted);
+  --tier-glow: rgba(236, 230, 218, 0.12);
+}
+
+[data-rarity="ACE"],
+[data-rarity="CHR"],
+[data-rarity="UTR"],
+[data-rarity="SE"] {
+  --tier: var(--gold);
+  --tier-glow: var(--gold-glow);
+}
+
+[data-rarity="TQR"],
+[data-rarity="SAR"],
+[data-rarity="QR"] {
+  --tier: var(--crimson);
+  --tier-glow: var(--crimson-glow);
+}
+
+[data-rarity="SSR"],
+[data-rarity="SR"] {
+  --tier: var(--cursed);
+  --tier-glow: var(--cursed-glow);
+}
+
+.rarity {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--tier, var(--muted));
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+
+/* ---------- En-tête ---------- */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  padding: 24px 0 8px;
+}
+
+/* Kanji vertical en contour, comme un sceau en filigrane */
+.hero-kanji {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  writing-mode: vertical-rl;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, 11vw, 7.5rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236, 230, 218, 0.13);
+  user-select: none;
+}
+
+.hero h1 {
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  letter-spacing: -0.01em;
+  max-width: 70%;
+}
+
+.hero h1 span {
   display: block;
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  margin: 16px 0;
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
+
+/* ---------- Bannière Eyesight ---------- */
 
 .eyesight-banner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
-  margin: 16px 0;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin: 32px 0 0;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--crimson);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, rgba(215, 38, 61, 0.14), transparent 75%), var(--surface);
 }
 
+.eyesight-banner p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.eyesight-banner a {
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--crimson);
+  border-radius: 6px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.eyesight-banner a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -6px var(--crimson-glow);
+}
+
+/* ---------- Filtres (collés en haut pendant le défilement) ---------- */
+
 .filters {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 16px 0;
+  gap: 12px;
+  margin: 32px -16px 0;
+  padding: 14px 16px;
+  background: rgba(10, 10, 16, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
 }
 
 .search-bar {
-  max-width: 320px;
-  padding: 6px 8px;
+  width: 100%;
+  max-width: 380px;
+  padding: 10px 14px;
   font-size: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar::placeholder {
+  color: var(--muted);
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--cursed);
+  box-shadow: 0 0 0 3px var(--cursed-glow);
 }
 
 .rarity-filter {
@@ -49,8 +182,186 @@
   gap: 6px;
 }
 
+/* Boutons en forme d'ofuda (talisman) : coins presque droits */
+.rarity-filter button {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.rarity-filter button:hover {
+  color: var(--text);
+  border-color: rgba(236, 230, 218, 0.35);
+}
+
 /* Bouton actif : on se sert de aria-pressed comme sélecteur, pas d'une classe en plus */
 .rarity-filter button[aria-pressed="true"] {
-  background: #222;
-  color: #fff;
+  color: var(--text);
+  background: var(--crimson);
+  border-color: var(--crimson);
+  box-shadow: 0 0 16px -2px var(--crimson-glow);
+}
+
+.count {
+  margin: 20px 0 16px;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Grille ---------- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
+  gap: clamp(10px, 2vw, 18px);
+}
+
+.card-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 8px 12px;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s, box-shadow 0.25s;
+}
+
+.card-tile:hover,
+.card-tile:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--tier);
+  box-shadow: 0 14px 34px -12px var(--tier-glow), 0 0 0 1px var(--tier);
+}
+
+.card-tile img {
+  display: block;
+  width: 100%;
+  /* Pas de ratio forcé : les R sont en paysage (302×216), les autres en portrait */
+  height: auto;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+/* Reflet holographique qui balaie les cartes les plus rares au survol */
+.card-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+
+.card-tile:is([data-rarity="ACE"], [data-rarity="CHR"], [data-rarity="UTR"], [data-rarity="SE"]):hover::after {
+  transform: translateX(120%);
+  transition: transform 0.8s ease;
+}
+
+.card-tile .name {
+  margin: 10px 2px 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.card-tile .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto 2px 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Aucun résultat ---------- */
+
+.no-results {
+  padding: 56px 16px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.no-results p {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.no-results button {
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--cursed);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.no-results button:hover {
+  background: var(--cursed-glow);
+}
+
+/* ---------- Fiche ---------- */
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 32px;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--text);
+}
+
+.card-detail {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+
+@media (min-width: 760px) {
+  .card-detail {
+    grid-template-columns: minmax(0, 400px) 1fr;
+    gap: 56px;
+  }
+}
+
+/* Les photos font 197 px : au-delà de ~400 px elles deviennent floues */
+.card-art img {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 14px;
+  border: 1px solid var(--tier);
+  box-shadow: 0 30px 80px -20px var(--tier-glow), 0 0 0 6px var(--surface);
+}
+
+.card-info h1 {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  margin-bottom: 16px;
+}
+
+.card-info .rarity {
+  font-size: 0.85rem;
+  padding: 4px 10px;
 }
