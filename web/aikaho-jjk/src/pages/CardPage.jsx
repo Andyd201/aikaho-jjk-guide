@@ -28,23 +28,30 @@ function CardPage() {
     }
   }, [card]);
 
-  const back = <Link to="/">← Retour au set</Link>;
+  const back = <Link to="/" className="back-link">← Retour au set</Link>;
 
-  if (loading) return <p>Chargement…</p>;
-  if (error) return <main>{back}<p>Impossible de charger la carte.</p></main>;
-  if (!card) return <main>{back}<p>Carte introuvable.</p></main>;
+  if (loading) return <main><p className="status">Chargement…</p></main>;
+  if (error) return <main>{back}<p className="status">Impossible de charger la carte.</p></main>;
+  if (!card) return <main>{back}<p className="status">Carte introuvable.</p></main>;
 
   return (
     <main className="card-page">
       {back}
-      {card.image_url && (
-        <img src={`${API_URL}${card.image_url}`} alt={card.name} width={197} height={274} />
-      )}
-      <h1>{card.name}</h1>
-      <p>
-        {card.set_code} · n° {card.number} · <span className="rarity">{card.rarity}</span>
-      </p>
-      <EyesightBanner cardId={card.id} />
+      <div className="card-detail" data-rarity={card.rarity}>
+        <div className="card-art">
+          {card.image_url && (
+            <img src={`${API_URL}${card.image_url}`} alt={card.name} width={197} height={274} />
+          )}
+        </div>
+        <div className="card-info">
+          <p className="eyebrow">
+            {card.set_code} · n° {card.number}
+          </p>
+          <h1>{card.name}</h1>
+          <span className="rarity">{card.rarity}</span>
+          <EyesightBanner cardId={card.id} />
+        </div>
+      </div>
     </main>
   );
 }

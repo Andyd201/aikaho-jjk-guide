@@ -76,18 +76,25 @@ function SetPage() {
     setSearchParams({});
   }
 
-  if (loading) return <p>Chargement…</p>;
-  if (error) return <p>Impossible de charger les cartes.</p>;
+  if (loading) return <main><p className="status">Chargement…</p></main>;
+  if (error) return <main><p className="status">Impossible de charger les cartes.</p></main>;
 
   return (
     <main>
-      <h1>Aikaho JJK-01 · Card Guide</h1>
-      <EyesightBanner />
+      <header className="hero">
+        {/* « Jujutsu Kaisen » en kanji, purement décoratif */}
+        <span className="hero-kanji" aria-hidden="true">呪術廻戦</span>
+        <p className="eyebrow">Aikaho · Set JJK-01</p>
+        <h1>
+          Card Guide <span>Jujutsu Kaisen</span>
+        </h1>
+        <EyesightBanner />
+      </header>
       <div className="filters">
         <SearchBar value={q} onChange={handleSearch} />
         <RarityFilter rarities={rarities} selected={selected} onToggle={toggleRarity} />
       </div>
-      <p>
+      <p className="count">
         {filteredCards.length} {filteredCards.length > 1 ? "cartes" : "carte"}
       </p>
       {filteredCards.length === 0 ? (

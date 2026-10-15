@@ -3,7 +3,7 @@ import { API_URL } from "../api.js";
 
 function CardTile({ card }) {
   return (
-    <Link to={`/cards/${card.id}`} className="card-tile">
+    <Link to={`/cards/${card.id}`} className="card-tile" data-rarity={card.rarity}>
       <img
         src={`${API_URL}${card.image_url}`}
         alt={card.name}
