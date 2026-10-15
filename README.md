@@ -110,3 +110,28 @@ ACE, CHR, UTR, SE, TQR, SAR, QR, SSR, SR, RRR, R
 ## Contribuer
 
 Une branche par issue, commits conventionnels (`feat:`, `fix:`, `chore:`…), PR vers `master` avec `Closes #N` dans la description.
+## Production
+
+| Partie | Où | URL |
+|---|---|---|
+| Front | Render (site statique, redéployé à chaque merge sur `master`) | https://aikaho-jjk-guide.onrender.com |
+| API + BD | Raspberry Pi 4, `docker compose` | Quick Tunnel Cloudflare (`*.trycloudflare.com`) |
+
+### Mettre en route sur le Pi
+```bash
+git clone https://github.com/Andyd201/aikaho-jjk-guide.git && cd aikaho-jjk-guide
+cp .env.example .env          # mettre un vrai mot de passe et CORS_ORIGIN=https://aikaho-jjk-guide.onrender.com
+docker compose up -d --build
+docker compose run --rm -v ./data:/data:ro api node scripts/seed.js   # → 151 cartes insérées
+```
+
+### Si le Pi redémarre
+L'URL du Quick Tunnel change. Pour remettre le guide en ligne :
+1. `docker compose logs tunnel | grep trycloudflare | tail -1` → copier la nouvelle URL
+2. Render → Environment → mettre à jour `VITE_API_URL`
+3. Render → Manual Deploy → **Clear build cache & deploy**
+
+### ⚠️ À ne pas faire
+- `source .env` ou `set -a; . ./.env` avant un `docker compose up` : les variables du terminal
+  passent avant celles du fichier `.env`, et l'API démarre avec d'anciennes valeurs.
+- `docker compose down` ou redémarrer le service `tunnel` sans raison : l'URL change.****
