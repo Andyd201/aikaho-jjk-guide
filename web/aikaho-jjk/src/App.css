@@ -8,3 +8,16 @@
   width: 100%;
   height: auto;
 }
+.card-tile {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Les photos font 197 px : au-delà de ~400 px elles deviennent floues */
+.card-page img {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin: 16px 0;
+}

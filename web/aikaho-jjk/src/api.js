@@ -10,3 +10,18 @@ export async function fetchCards() {
 
   return res.json();
 }
+
+export async function fetchCard(id) {
+  const res = await fetch(`${API_URL}/cards/${encodeURIComponent(id)}`);
+
+  // 404 = carte inexistante : c'est un résultat normal, pas une panne
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (!res.ok) {
+    throw new Error(`Erreur API : ${res.status}`);
+  }
+
+  return res.json();
+}

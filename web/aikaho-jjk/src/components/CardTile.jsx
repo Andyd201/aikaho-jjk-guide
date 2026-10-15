@@ -1,8 +1,9 @@
+import { Link } from "react-router";
 import { API_URL } from "../api.js";
 
 function CardTile({ card }) {
   return (
-    <div className="card-tile">
+    <Link to={`/cards/${card.id}`} className="card-tile">
       <img
         src={`${API_URL}${card.image_url}`}
         alt={card.name}
@@ -14,7 +15,7 @@ function CardTile({ card }) {
       <p className="meta">
         {card.number} <span className="rarity">{card.rarity}</span>
       </p>
-    </div>
+    </Link>
   );
 }
 
