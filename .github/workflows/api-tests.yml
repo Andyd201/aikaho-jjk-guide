@@ -1,0 +1,48 @@
+name: API tests
+
+# Quand la CI roule : sur chaque PR, et sur chaque push vers master
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Un vrai Postgres démarré à côté du job, comme ton docker compose
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aikaho
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: aikaho_jjk_test   # se termine par _test → ton garde-fou passe
+        ports:
+          - 5432:5432
+        # Attend que Postgres soit prêt avant de lancer les tests
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://aikaho:test@localhost:5432/aikaho_jjk_test
+
+    # Toutes les commandes "run" s'exécutent dans api/
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - run: npm ci
+      - run: npm test
