@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { API_URL, fetchCard } from "../api.js";
-import { SET_NAME } from "../config.js";
+import { SET_DESCRIPTION, SET_NAME, SET_TITLE } from "../config.js";
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import JsonLd from "../components/JsonLd.jsx";
 import Seo from "../components/Seo.jsx";
@@ -27,10 +27,13 @@ function CardPage() {
 
   const back = <Link to="/" className="back-link">← Retour au set</Link>;
 
-  if (loading) return <main><p className="status">Chargement…</p></main>;
+  // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
+  const fallbackSeo = <Seo title={SET_TITLE} description={SET_DESCRIPTION} path={`/cards/${id}`} />;
+
+  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
   // Pas de noindex sur une erreur : si le Pi est en panne pendant que Google passe,
   // la page ne doit pas sortir de l'index
-  if (error) return <main>{back}<p className="status">Impossible de charger la carte.</p></main>;
+  if (error) return <main>{fallbackSeo}{back}<p className="status">Impossible de charger la carte.</p></main>;
   if (!card) {
     return (
       <main>

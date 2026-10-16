@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { fetchCards } from "../api.js";
-import { SET_NAME, SITE_URL } from "../config.js";
+import { SET_DESCRIPTION, SET_NAME, SET_TITLE, SITE_URL } from "../config.js";
 import CardGrid from "../components/CardGrid.jsx";
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import JsonLd from "../components/JsonLd.jsx";
@@ -75,8 +75,11 @@ function SetPage() {
     setSearchParams({});
   }
 
-  if (loading) return <main><p className="status">Chargement…</p></main>;
-  if (error) return <main><p className="status">Impossible de charger les cartes.</p></main>;
+  // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
+  const fallbackSeo = <Seo title={SET_TITLE} description={SET_DESCRIPTION} path="/" />;
+
+  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
+  if (error) return <main>{fallbackSeo}<p className="status">Impossible de charger les cartes.</p></main>;
 
   // Toujours sur toutes les cartes, pas sur les cartes filtrées
   const title = `${SET_NAME} Card List – All ${cards.length} Cards & Rarities`;
