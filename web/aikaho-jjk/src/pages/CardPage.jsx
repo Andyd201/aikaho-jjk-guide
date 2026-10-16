@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { API_URL, fetchCard } from "../api.js";
+import { SET_NAME } from "../config.js";
 import EyesightBanner from "../components/EyesightBanner.jsx";
+import JsonLd from "../components/JsonLd.jsx";
+import Seo from "../components/Seo.jsx";
 
 function CardPage() {
   const { id } = useParams();
@@ -22,26 +25,58 @@ function CardPage() {
   const loading = result.id !== id;
   const { card, error } = result;
 
-  useEffect(() => {
-    if (card) {
-      document.title = `${card.name} (${card.rarity}) · Aikaho JJK-01`;
-    }
-  }, [card]);
-
   const back = <Link to="/" className="back-link">← Retour au set</Link>;
 
   if (loading) return <main><p className="status">Chargement…</p></main>;
+  // Pas de noindex sur une erreur : si le Pi est en panne pendant que Google passe,
+  // la page ne doit pas sortir de l'index
   if (error) return <main>{back}<p className="status">Impossible de charger la carte.</p></main>;
-  if (!card) return <main>{back}<p className="status">Carte introuvable.</p></main>;
+  if (!card) {
+    return (
+      <main>
+        <title>{`Card not found – ${SET_NAME}`}</title>
+        <meta name="robots" content="noindex" />
+        {back}
+        <p className="status">Carte introuvable.</p>
+      </main>
+    );
+  }
+
+  const image = card.image_url ? `${API_URL}${card.image_url}` : undefined;
+  const alt = `${card.name} – ${SET_NAME} ${card.rarity} card`;
+  const description =
+    `${card.name} (${card.rarity}-${card.number}) from the ${SET_NAME} trading card set: ` +
+    `card image, rarity and number.`;
+  // Product sans prix (offers) : pas d'extrait enrichi dans Google, mais il comprend la page
+  const product = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${card.name} ${card.rarity}-${card.number}`,
+    sku: card.id,
+    image,
+    description,
+    brand: { "@type": "Brand", name: "Aikaho" },
+    category: "Trading Cards",
+    additionalProperty: [
+      { "@type": "PropertyValue", name: "Set", value: card.set_code },
+      { "@type": "PropertyValue", name: "Rarity", value: card.rarity },
+      { "@type": "PropertyValue", name: "Card number", value: card.number },
+    ],
+  };
 
   return (
     <main className="card-page">
+      <Seo
+        title={`${card.name} ${card.rarity}-${card.number} – ${SET_NAME}`}
+        description={description}
+        path={`/cards/${card.id}`}
+        image={image}
+      />
+      <JsonLd data={product} />
       {back}
       <div className="card-detail" data-rarity={card.rarity}>
         <div className="card-art">
-          {card.image_url && (
-            <img src={`${API_URL}${card.image_url}`} alt={card.name} width={197} height={274} />
-          )}
+          {image && <img src={image} alt={alt} width={197} height={274} />}
         </div>
         <div className="card-info">
           <p className="eyebrow">

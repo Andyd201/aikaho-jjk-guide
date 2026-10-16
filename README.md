@@ -102,6 +102,41 @@ SE, ACE, CHR, UTR, TQR, SAR, QR, SSR, SR, RRR, R
 | `GET /rarities` | 🚧 Sprint 1 : les 11 raretés dans l'ordre |
 | `/images` | 🚧 Sprint 1 : photos des cartes (WebP ~800 px) servies en statique |
 
+## SEO
+
+Objectif : sortir premier sur Google pour « aikaho jujutsu kaisen card list ». Titres, descriptions et texte du set sont en anglais.
+
+### Variables du front (`web/aikaho-jjk`)
+
+Voir [web/aikaho-jjk/.env.example](web/aikaho-jjk/.env.example).
+
+| Variable | Rôle |
+|---|---|
+| `VITE_API_URL` | URL de l'API (images des cartes, aussi utilisées pour `og:image`) |
+| `VITE_SITE_URL` | URL publique du site, sans `/` à la fin : canonical, Open Graph, `sitemap.xml`, `robots.txt` |
+
+`VITE_SITE_URL` vaut `https://aikaho-jjk-guide.onrender.com` par défaut ([.env.production](web/aikaho-jjk/.env.production)). Le jour où le domaine change : mettre la nouvelle valeur dans Render → Environment, puis **Clear build cache & deploy**.
+
+### Ce qui est en place
+
+- `<title>`, description, canonical, Open Graph et Twitter card sur chaque page, avec les balises natives de React 19 ([Seo.jsx](web/aikaho-jjk/src/components/Seo.jsx))
+- JSON-LD : `ItemList` sur le set, `Product` (sans prix) sur chaque fiche
+- Bloc « About the set » sous la grille, calculé à partir des cartes ([SetAbout.jsx](web/aikaho-jjk/src/components/SetAbout.jsx))
+- Balises par défaut dans `index.html` (`data-fallback`) pour les robots qui n'exécutent pas le JavaScript
+- `sitemap.xml` et `robots.txt` générés par [scripts/generate-seo-files.js](web/aikaho-jjk/scripts/generate-seo-files.js) à partir de `data/cards.csv`. Lancé tout seul avant `npm run build` (`prebuild`). Les fichiers ne sont pas commités.
+
+> ⚠️ Le site est encore une SPA : Discord, Facebook et LinkedIn ne lisent que les balises par défaut de `index.html`, pas celles de la carte. Le pré-rendu (#55) règle ça.
+
+### Soumettre le site à Google Search Console
+
+1. https://search.google.com/search-console → **Ajouter une propriété** → **Préfixe de l'URL** → coller la valeur de `VITE_SITE_URL`
+2. Valider avec la méthode **Balise HTML** : ajouter la balise `<meta name="google-site-verification" …>` dans `web/aikaho-jjk/index.html` (sans `data-fallback`), merger, attendre le déploiement Render, puis **Valider**
+3. **Sitemaps** → entrer `sitemap.xml` → **Envoyer**
+4. **Inspection de l'URL** → coller l'URL du site → **Demander l'indexation** (refaire pour quelques fiches de cartes)
+5. Revenir dans quelques jours : **Pages** montre ce qui est indexé, **Performances** montre les recherches qui mènent au guide
+
+Si le domaine change, il faut ajouter une nouvelle propriété dans Search Console et renvoyer le sitemap.
+
 ## Dépannage
 
 - **`Bind for 0.0.0.0:3000 failed: port is already allocated`** : un autre programme utilise le port. Change `API_PORT` dans `.env`.
