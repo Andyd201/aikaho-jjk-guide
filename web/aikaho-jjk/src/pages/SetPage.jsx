@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { fetchCards } from "../api.js";
+import { SET_DESCRIPTION, SET_NAME, SET_TITLE, SITE_URL } from "../config.js";
 import CardGrid from "../components/CardGrid.jsx";
 import EyesightBanner from "../components/EyesightBanner.jsx";
+import JsonLd from "../components/JsonLd.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 import RarityFilter from "../components/RarityFilter.jsx";
+import Seo from "../components/Seo.jsx";
+import SetAbout from "../components/SetAbout.jsx";
 
 function SetPage() {
   const [cards, setCards] = useState([]);
@@ -27,11 +31,6 @@ function SetPage() {
       .then((data) => setCards(data))
       .catch((err) => setError(err))
       .finally(() => setLoading(false));
-  }, []);
-
-  // CardPage change le titre de l'onglet : on remet celui du set en revenant
-  useEffect(() => {
-    document.title = "Aikaho JJK-01 · Card Guide";
   }, []);
 
   // Raretés uniques des cartes chargées, triées par rang : pas besoin d'appeler /rarities
@@ -76,11 +75,38 @@ function SetPage() {
     setSearchParams({});
   }
 
-  if (loading) return <main><p className="status">Chargement…</p></main>;
-  if (error) return <main><p className="status">Impossible de charger les cartes.</p></main>;
+  // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
+  const fallbackSeo = <Seo title={SET_TITLE} description={SET_DESCRIPTION} path="/" />;
+
+  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
+  if (error) return <main>{fallbackSeo}<p className="status">Impossible de charger les cartes.</p></main>;
+  // Liste vide : sinon le titre dirait « All 0 Cards » et SetAbout n'aurait aucune rareté
+  if (cards.length === 0) {
+    return <main>{fallbackSeo}<p className="status">Aucune carte pour l'instant.</p></main>;
+  }
+
+  // Toujours sur toutes les cartes, pas sur les cartes filtrées
+  const title = `${SET_NAME} Card List – All ${cards.length} Cards & Rarities`;
+  const description =
+    `Complete card list for the ${SET_NAME} set: all ${cards.length} cards with images, ` +
+    `card numbers and rarities (${rarities.join(", ")}).`;
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${SET_NAME} card list`,
+    numberOfItems: cards.length,
+    itemListElement: cards.map((card, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/cards/${card.id}`,
+      name: card.name,
+    })),
+  };
 
   return (
     <main>
+      <Seo title={title} description={description} path="/" />
+      <JsonLd data={itemList} />
       <header className="hero">
         {/* « Jujutsu Kaisen » en kanji, purement décoratif */}
         <span className="hero-kanji" aria-hidden="true">呪術廻戦</span>
@@ -107,6 +133,7 @@ function SetPage() {
       ) : (
         <CardGrid cards={filteredCards} />
       )}
+      <SetAbout cards={cards} rarities={rarities} />
     </main>
   );
 }

@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Générés au build par scripts/generate-seo-files.js
+public/sitemap.xml
+public/robots.txt

@@ -365,3 +365,51 @@ main {
   font-size: 0.85rem;
   padding: 4px 10px;
 }
+
+/* ---------- À propos du set (texte SEO sous la grille) ---------- */
+
+.set-about {
+  max-width: 720px;
+  margin: 72px 0 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.set-about h2 {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.set-about h3 {
+  margin: 28px 0 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rarity-table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.rarity-table th,
+.rarity-table td {
+  padding: 6px 24px 6px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.rarity-table thead th {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.rarity-table td {
+  color: var(--text);
+}
