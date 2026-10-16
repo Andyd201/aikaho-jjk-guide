@@ -6,8 +6,8 @@ describe('RARITIES', () => {
         expect(RARITIES).toHaveLength(11);
     });
 
-    it('commence par la plus rare (ACE)', () => {
-        expect(RARITIES[0]).toBe('ACE');
+    it('commence par la plus rare (SE)', () => {
+        expect(RARITIES[0]).toBe('SE');
     });
 
     it('finit par la plus commune (R)', () => {
@@ -20,7 +20,7 @@ describe('RARITIES', () => {
 
     // Même ordre que le CHECK de db/init.sql : si un des deux change, ce test le signale
     it('est dans le bon ordre', () => {
-        expect(RARITIES).toEqual(['ACE', 'CHR', 'UTR', 'SE', 'TQR', 'SAR', 'QR', 'SSR', 'SR', 'RRR', 'R']);
+        expect(RARITIES).toEqual(['SE', 'ACE', 'CHR', 'UTR', 'TQR', 'SAR', 'QR', 'SSR', 'SR', 'RRR', 'R']);
     });
 
     it('ne peut pas être modifié', () => {

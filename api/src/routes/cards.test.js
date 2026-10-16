@@ -47,9 +47,9 @@ describe("GET /cards", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.map((c) => c.id)).toEqual([
+      "JJK01-SE-001",
       "JJK01-ACE-001",
       "JJK01-CHR-001",
-      "JJK01-SE-001",
       "JJK01-SSR-001",
       "JJK01-R-001",
       "JJK01-R-002",
@@ -74,7 +74,7 @@ describe("GET /cards", () => {
     const res = await request(app).get("/cards?rarity=ACE,SE");
 
     expect(res.status).toBe(200);
-    expect(res.body.map((c) => c.id)).toEqual(["JJK01-ACE-001", "JJK01-SE-001"]);
+    expect(res.body.map((c) => c.id)).toEqual(["JJK01-SE-001", "JJK01-ACE-001"]);
   });
 
   it("combine search et rarity", async () => {
@@ -123,7 +123,7 @@ describe("GET /cards/:id", () => {
       set_code: "JJK-01",
       number: "001",
       rarity: "SE",
-      rarity_rank: 4,
+      rarity_rank: 1,
       image_url: null,
     });
   });
@@ -141,7 +141,7 @@ describe("GET /rarities", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(11);
-    expect(res.body[0]).toEqual({ code: "ACE", rank: 1 });
+    expect(res.body[0]).toEqual({ code: "SE", rank: 1 });
     expect(res.body[10]).toEqual({ code: "R", rank: 11 });
   });
 });

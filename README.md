@@ -88,7 +88,7 @@ Table `cards` :
 | `created_at` | timestamptz | Rempli automatiquement |
 
 Ordre des raretés (`rarity_rank` 1 → 11) :
-ACE, CHR, UTR, SE, TQR, SAR, QR, SSR, SR, RRR, R
+SE, ACE, CHR, UTR, TQR, SAR, QR, SSR, SR, RRR, R
 
 > ⚠️ `db/init.sql` n'est exécuté que si le volume de données est **vide**. Après une modification du schéma, repartir à neuf avec `docker compose down -v` (efface les données).
 
