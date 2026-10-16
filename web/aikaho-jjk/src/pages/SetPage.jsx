@@ -80,6 +80,10 @@ function SetPage() {
 
   if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
   if (error) return <main>{fallbackSeo}<p className="status">Impossible de charger les cartes.</p></main>;
+  // Liste vide : sinon le titre dirait « All 0 Cards » et SetAbout n'aurait aucune rareté
+  if (cards.length === 0) {
+    return <main>{fallbackSeo}<p className="status">Aucune carte pour l'instant.</p></main>;
+  }
 
   // Toujours sur toutes les cartes, pas sur les cartes filtrées
   const title = `${SET_NAME} Card List – All ${cards.length} Cards & Rarities`;
