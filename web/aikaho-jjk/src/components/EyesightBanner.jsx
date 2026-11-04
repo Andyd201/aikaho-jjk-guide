@@ -1,20 +1,37 @@
 import { EYESIGHT_URL } from "../config.js";
 
-// cardId optionnel : sur une fiche, utm_content dit quelle carte a mené à la boutique
-function EyesightBanner({ cardId }) {
-  const url = new URL(EYESIGHT_URL);
-  url.searchParams.set("utm_source", "guide-jjk");
-  url.searchParams.set("utm_medium", "banner");
-  url.searchParams.set("utm_campaign", "aikaho-jjk01");
-  if (cardId) {
-    url.searchParams.set("utm_content", cardId);
+// Seuls les liens https vers la boutique Eyesight sont acceptés : un lien mal tapé dans /admin
+// (ou autre chose qu'Eyesight) ne doit ni faire planter la page, ni envoyer ailleurs.
+function shopUrl(url) {
+  try {
+    const link = new URL(url);
+    const host = link.hostname.toLowerCase();
+    if (link.protocol === "https:" && (host === "eyesightcollectibles.com" || host.endsWith(".eyesightcollectibles.com"))) {
+      return link;
+    }
+  } catch {
+    /* lien invalide : lien par défaut */
+  }
+  return new URL(EYESIGHT_URL);
+}
+
+// url : product_url de la carte ou du set (sinon le lien Eyesight par défaut)
+// content : utm_content, dit quelle page a mené à la boutique (id de carte, code de set, « home »)
+// campaign : utm_campaign, un par set (ex. jjk-01) pour comparer les sets dans WooCommerce
+function EyesightBanner({ url, content, campaign = "guide", text = "Procure-toi tes cartes chez Eyesight" }) {
+  const link = shopUrl(url);
+  link.searchParams.set("utm_source", "guide-jjk");
+  link.searchParams.set("utm_medium", "banner");
+  link.searchParams.set("utm_campaign", campaign.toLowerCase());
+  if (content) {
+    link.searchParams.set("utm_content", content);
   }
 
   return (
     <div className="eyesight-banner">
-      <p>Procure-toi tes boîtes Aikaho JJK chez Eyesight</p>
+      <p>{text}</p>
       {/* nouvel onglet : le visiteur ne perd pas le guide */}
-      <a href={url.toString()} target="_blank" rel="noopener">
+      <a href={link.toString()} target="_blank" rel="noopener">
         Voir la boutique →
       </a>
     </div>

@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router";
-import { fetchCards } from "../api.js";
-import { SET_DESCRIPTION, SET_NAME, SET_TITLE, SITE_URL } from "../config.js";
+import { Link, useParams, useSearchParams } from "react-router";
+import { fetchSet, fetchSetCards } from "../api.js";
+import {
+  GAME_KANJI,
+  SITE_NAME,
+  SITE_URL,
+  setFallbackDescription,
+  setFallbackTitle,
+} from "../config.js";
 import CardGrid from "../components/CardGrid.jsx";
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import JsonLd from "../components/JsonLd.jsx";
@@ -11,11 +17,11 @@ import Seo from "../components/Seo.jsx";
 import SetAbout from "../components/SetAbout.jsx";
 
 function SetPage() {
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { code } = useParams();
+  // On garde le code avec le résultat : s'il ne correspond pas à l'URL, c'est que ça charge
+  const [result, setResult] = useState({ code: null, set: null, cards: [], error: null });
 
-  // Les filtres vivent dans l'URL (/?q=goj&rarity=ACE,CHR) : ils survivent au retour
+  // Les filtres vivent dans l'URL (/sets/JJK-01?q=goj&rarity=ACE,CHR) : ils survivent au retour
   // depuis une fiche et une recherche peut se partager
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get("q") ?? "";
@@ -25,19 +31,30 @@ function SetPage() {
     [rarityParam],
   );
 
-  // [] : on charge les cartes une seule fois, au premier affichage
+  // [code] : on recharge quand on passe d'un set à un autre.
+  // Set et cartes en parallèle ; si le set n'existe pas, /cards répond 404 → on l'ignore
   useEffect(() => {
-    fetchCards()
-      .then((data) => setCards(data))
-      .catch((err) => setError(err))
-      .finally(() => setLoading(false));
-  }, []);
+    let ignore = false; // évite qu'une vieille réponse écrase le set courant
+    Promise.all([fetchSet(code), fetchSetCards(code).catch(() => null)])
+      .then(([set, cards]) => {
+        if (ignore) return;
+        if (set && !cards) throw new Error("Cartes introuvables");
+        setResult({ code, set, cards: cards ?? [], error: null });
+      })
+      .catch((error) => !ignore && setResult({ code, set: null, cards: [], error }));
+    return () => {
+      ignore = true;
+    };
+  }, [code]);
 
-  // Raretés uniques des cartes chargées, triées par rang : pas besoin d'appeler /rarities
-  const rarities = useMemo(() => {
-    const ranks = new Map(cards.map((card) => [card.rarity, card.rarity_rank]));
-    return [...ranks.keys()].sort((a, b) => ranks.get(a) - ranks.get(b));
-  }, [cards]);
+  const loading = result.code !== code;
+  const { set, cards, error } = result;
+
+  // Ordre des chips = ordre des raretés du set ; on cache celles qui n'ont aucune carte
+  const rarities = useMemo(
+    () => (set ? set.rarities.filter((rarity) => rarity.card_count > 0) : []),
+    [set],
+  );
 
   const filteredCards = useMemo(
     () =>
@@ -75,50 +92,84 @@ function SetPage() {
     setSearchParams({});
   }
 
+  const path = `/sets/${code}`;
+  const back = <Link to="/" className="back-link">← Tous les sets</Link>;
+
   // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
-  const fallbackSeo = <Seo title={SET_TITLE} description={SET_DESCRIPTION} path="/" />;
+  const fallbackSeo = (
+    <Seo
+      title={set ? `${set.name} Card List – All Cards & Rarities` : setFallbackTitle(code)}
+      description={setFallbackDescription(set ? set.name : code)}
+      path={path}
+    />
+  );
 
   if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
-  if (error) return <main>{fallbackSeo}<p className="status">Impossible de charger les cartes.</p></main>;
+  // Pas de noindex sur une erreur : si le Pi est en panne pendant que Google passe,
+  // la page ne doit pas sortir de l'index
+  if (error) return <main>{fallbackSeo}{back}<p className="status">Impossible de charger le set.</p></main>;
+  if (!set) {
+    return (
+      <main>
+        <title>{`Set not found – ${SITE_NAME}`}</title>
+        <meta name="robots" content="noindex" />
+        {back}
+        <p className="status">Set introuvable.</p>
+      </main>
+    );
+  }
   // Liste vide : sinon le titre dirait « All 0 Cards » et SetAbout n'aurait aucune rareté
   if (cards.length === 0) {
-    return <main>{fallbackSeo}<p className="status">Aucune carte pour l'instant.</p></main>;
+    return <main>{fallbackSeo}{back}<p className="status">Aucune carte pour l'instant.</p></main>;
   }
 
   // Toujours sur toutes les cartes, pas sur les cartes filtrées
-  const title = `${SET_NAME} Card List – All ${cards.length} Cards & Rarities`;
+  const title = `${set.name} Card List – All ${cards.length} Cards & Rarities`;
   const description =
-    `Complete card list for the ${SET_NAME} set: all ${cards.length} cards with images, ` +
-    `card numbers and rarities (${rarities.join(", ")}).`;
+    `Complete card list for the ${set.name} set: all ${cards.length} cards with images, ` +
+    `card numbers and rarities (${rarities.map((rarity) => rarity.code).join(", ")}).`;
   const itemList = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${SET_NAME} card list`,
+    name: `${set.name} card list`,
     numberOfItems: cards.length,
     itemListElement: cards.map((card, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/cards/${card.id}`,
+      url: `${SITE_URL}/sets/${set.code}/cards/${card.id}`,
       name: card.name,
     })),
   };
+  const kanji = GAME_KANJI[set.game_code];
 
   return (
     <main>
-      <Seo title={title} description={description} path="/" />
+      <Seo title={title} description={description} path={path} />
       <JsonLd data={itemList} />
-      <header className="hero">
-        {/* « Jujutsu Kaisen » en kanji, purement décoratif */}
-        <span className="hero-kanji" aria-hidden="true">呪術廻戦</span>
-        <p className="eyebrow">Aikaho · Set JJK-01</p>
+      <header className="hero hero-set">
+        {/* Kanji du jeu, purement décoratif */}
+        {kanji && <span className="hero-kanji" aria-hidden="true">{kanji}</span>}
+        {back}
+        <p className="eyebrow">
+          {set.game_name} · Set {set.code}
+        </p>
         <h1>
-          Card Guide <span>Jujutsu Kaisen</span>
+          {set.name} <span>Card List</span>
         </h1>
-        <EyesightBanner />
+        <EyesightBanner
+          url={set.product_url}
+          content={set.code}
+          campaign={set.code}
+          text={`Procure-toi tes boîtes ${set.name} chez Eyesight`}
+        />
       </header>
       <div className="filters">
         <SearchBar value={q} onChange={handleSearch} />
-        <RarityFilter rarities={rarities} selected={selected} onToggle={toggleRarity} />
+        <RarityFilter
+          rarities={rarities.map((rarity) => rarity.code)}
+          selected={selected}
+          onToggle={toggleRarity}
+        />
       </div>
       <p className="count">
         {filteredCards.length} {filteredCards.length > 1 ? "cartes" : "carte"}
@@ -131,9 +182,9 @@ function SetPage() {
           </button>
         </div>
       ) : (
-        <CardGrid cards={filteredCards} />
+        <CardGrid cards={filteredCards} setName={set.name} />
       )}
-      <SetAbout cards={cards} rarities={rarities} />
+      <SetAbout set={set} cardCount={cards.length} rarities={rarities} />
     </main>
   );
 }

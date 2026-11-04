@@ -118,7 +118,7 @@ Voir [web/aikaho-jjk/.env.example](web/aikaho-jjk/.env.example).
 
 | Variable | Rôle |
 |---|---|
-| `VITE_API_URL` | URL de l'API (images des cartes, aussi utilisées pour `og:image`) |
+| `VITE_API_URL` | URL de l'API (données, images des cartes pour `og:image`, et `sitemap.xml` au build) |
 | `VITE_SITE_URL` | URL publique du site, sans `/` à la fin : canonical, Open Graph, `sitemap.xml`, `robots.txt` |
 
 `VITE_SITE_URL` vaut `https://aikaho-jjk-guide.onrender.com` par défaut ([.env.production](web/aikaho-jjk/.env.production)). Le jour où le domaine change : mettre la nouvelle valeur dans Render → Environment, puis **Clear build cache & deploy**.
@@ -126,10 +126,22 @@ Voir [web/aikaho-jjk/.env.example](web/aikaho-jjk/.env.example).
 ### Ce qui est en place
 
 - `<title>`, description, canonical, Open Graph et Twitter card sur chaque page, avec les balises natives de React 19 ([Seo.jsx](web/aikaho-jjk/src/components/Seo.jsx))
-- JSON-LD : `ItemList` sur le set, `Product` (sans prix) sur chaque fiche
-- Bloc « About the set » sous la grille, calculé à partir des cartes ([SetAbout.jsx](web/aikaho-jjk/src/components/SetAbout.jsx))
-- Balises par défaut dans `index.html` (`data-fallback`) pour les robots qui n'exécutent pas le JavaScript
-- `sitemap.xml` et `robots.txt` générés par [scripts/generate-seo-files.js](web/aikaho-jjk/scripts/generate-seo-files.js) à partir de `data/cards.csv`. Lancé tout seul avant `npm run build` (`prebuild`). Les fichiers ne sont pas commités.
+- JSON-LD : `ItemList` sur chaque set, `Product` (sans prix, marque = le jeu) sur chaque fiche
+- Bloc « About the set » sous la grille, calculé à partir des raretés du set renvoyées par l'API ([SetAbout.jsx](web/aikaho-jjk/src/components/SetAbout.jsx))
+- Balises par défaut dans `index.html` (`data-fallback`, celles de l'accueil) pour les robots qui n'exécutent pas le JavaScript
+- `sitemap.xml` et `robots.txt` générés par [scripts/generate-seo-files.js](web/aikaho-jjk/scripts/generate-seo-files.js) à partir de l'API (`VITE_API_URL`) : `/`, chaque `/sets/:code` et chaque `/sets/:code/cards/:id` des sets publiés. Si l'API ne répond pas (15 s), le build **ne plante pas** : un avertissement s'affiche et le sitemap est fait à partir de `data/cards.csv` (JJK-01 seulement). Lancé tout seul avant `npm run build` (`prebuild`). Les fichiers ne sont pas commités.
+
+### Pages du front
+
+| URL | Page |
+|---|---|
+| `/` | Accueil : les sets publiés, regroupés par jeu |
+| `/sets/:code` | Grille d'un set, recherche et filtres dans l'URL (`?q=goj&rarity=ACE,CHR`) |
+| `/sets/:code/cards/:id` | Fiche d'une carte (si la carte est dans un autre set, redirection vers la bonne URL) |
+
+Anciennes URL (d'avant le multi-set, déjà partagées) : `/cards/:id` redirige vers `/sets/<set de la carte>/cards/:id`, et `/?q=…&rarity=…` redirige vers `/sets/JJK-01` avec les mêmes filtres (`LEGACY_SET_CODE` dans [config.js](web/aikaho-jjk/src/config.js)).
+
+La bannière Eyesight pointe vers le produit de la carte, sinon celui du set (`product_url`), sinon vers `EYESIGHT_URL`.
 
 > ⚠️ Le site est encore une SPA : Discord, Facebook et LinkedIn ne lisent que les balises par défaut de `index.html`, pas celles de la carte. Le pré-rendu (#55) règle ça.
 
