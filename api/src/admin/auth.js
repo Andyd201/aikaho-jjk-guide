@@ -52,6 +52,7 @@ export async function requireAdmin(req, res, next) {
     const { payload } = await jwtVerify(token, getJwks(teamDomain), {
       issuer: `https://${teamDomain}`,
       audience,
+      algorithms: ["RS256"],
     });
     req.adminEmail = payload.email;
     next();

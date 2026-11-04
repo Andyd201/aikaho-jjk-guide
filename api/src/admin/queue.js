@@ -46,7 +46,9 @@ async function setContext(setCode) {
 
 async function processItem(item) {
   try {
-    const image = await readFile(join(IMAGES_DIR, item.set_code, item.image_file));
+    // La copie HD si elle existe (lecture des petits codes), sinon la photo du guide
+    const base = join(IMAGES_DIR, item.set_code, item.image_file);
+    const image = await readFile(base.replace(/\.webp$/, ".hd.webp")).catch(() => readFile(base));
     const card = await services.readCard(image, await setContext(item.set_code));
     await pool.query(
       `UPDATE import_items SET
@@ -82,14 +84,23 @@ async function worker() {
 
 // Lance des workers jusqu'à CONCURRENCY ; sans effet si la file tourne déjà.
 // Retourne une promesse résolue quand la file est vide (utile pour les tests).
+// kicked : une photo est arrivée pendant que les workers tournaient. Un worker qui vient de
+// trouver la file vide (juste avant l'arrivée de la photo) relance alors un tour au lieu de s'arrêter.
+let kicked = false;
+
 export function kickQueue() {
   if (running === 0) idle = new Promise((resolve) => (resolveIdle = resolve));
+  if (running >= CONCURRENCY) kicked = true;
   while (running < CONCURRENCY) {
     running++;
     worker()
       .catch((err) => console.error("File d'import :", err.message))
       .finally(() => {
         running--;
+        if (kicked) {
+          kicked = false;
+          kickQueue();
+        }
         if (running === 0) resolveIdle?.();
       });
   }

@@ -10,7 +10,7 @@ export async function searchProducts(query) {
   const url = new URL(`${base}/wp-json/wc/v3/products`);
   url.searchParams.set("search", query);
   url.searchParams.set("status", "publish");
-  url.searchParams.set("per_page", "20");
+  url.searchParams.set("per_page", "50");
 
   const auth = Buffer.from(`${process.env.WOO_KEY}:${process.env.WOO_SECRET}`).toString("base64");
   const res = await fetch(url, {
@@ -27,16 +27,19 @@ const squash = (text) => text.toUpperCase().replace(/[\s_-]+/g, "");
 
 // Choisit le produit d'une carte parmi les résultats de recherche.
 // - candidats = produits dont le nom contient le code (rareté + numéro)
-// - si plusieurs, on garde ceux qui mentionnent aussi le set (ex. JJK-01 / JJK01)
-// - un seul candidat restant → choisi automatiquement ; sinon c'est à toi de choisir dans /admin
-export function matchProduct(products, { rarity, number, setCode }) {
-  const code = squash(`${rarity}${number}`);
+// - choix automatique SEULEMENT si un seul candidat mentionne aussi le set (JJK-01, JJK01)
+//   ou le jeu (un mot de 4 lettres et plus du nom du jeu, ex. « Jujutsu ») : sinon un « SR-001 »
+//   d'un autre jeu pourrait être choisi. Les autres cas sont proposés dans /admin.
+export function matchProduct(products, { rarity, number, setCode, gameName = "" }) {
+  const escaped = rarity.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   // Le code ne doit pas être collé à d'autres lettres/chiffres (SR-012 ≠ SSR-012, SSR-0123)
-  const codePattern = new RegExp(`(^|[^A-Z0-9])${rarity}[\\s_-]*${number}($|[^0-9])`, "i");
-  const candidates = products.filter((p) => codePattern.test(p.name) || squash(p.name) === code);
-  if (candidates.length <= 1) return { match: candidates[0] ?? null, candidates };
+  const codePattern = new RegExp(`(^|[^A-Z0-9])${escaped}[\\s_-]*${number}($|[^0-9])`, "i");
+  const candidates = products.filter((p) => codePattern.test(p.name));
 
-  const setKey = squash(setCode);
-  const inSet = candidates.filter((p) => squash(p.name).includes(setKey));
-  return { match: inSet.length === 1 ? inSet[0] : null, candidates: inSet.length ? inSet : candidates };
+  const keys = [squash(setCode), ...gameName.split(/\s+/).filter((w) => w.length >= 4).map(squash)];
+  const inContext = candidates.filter((p) => keys.some((key) => squash(p.name).includes(key)));
+  const inSet = inContext.filter((p) => squash(p.name).includes(squash(setCode)));
+
+  const match = inSet.length === 1 ? inSet[0] : inSet.length === 0 && inContext.length === 1 ? inContext[0] : null;
+  return { match, candidates: inSet.length ? inSet : inContext.length ? inContext : candidates };
 }

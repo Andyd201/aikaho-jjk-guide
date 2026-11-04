@@ -15,10 +15,11 @@ const ADMIN_UI_DIR = join(import.meta.dirname, "../../admin");
 const SET_CODE = /^[A-Z0-9]+(-[A-Z0-9]+)*$/;
 const GAME_CODE = /^[A-Z0-9]+(-[A-Z0-9]+)*$/;
 
-// Photos gardées en mémoire le temps de la conversion en WebP (max 20 Mo chacune, 200 par envoi)
+// Photos gardées en mémoire le temps de la conversion en WebP (max 20 Mo chacune, 20 par envoi ;
+// l'interface envoie par paquets de 10, Cloudflare refuse les requêtes de plus de 100 Mo)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024, files: 200 },
+  limits: { fileSize: 20 * 1024 * 1024, files: 20 },
   fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 });
 
@@ -30,6 +31,9 @@ router.use(requireAdmin, sameOriginOnly);
 
 const api = Router();
 router.use("/api", api);
+
+// /items/abc → 400 au lieu d'une erreur Postgres
+api.param("id", (req, res, next, id) => (/^\d+$/.test(id) ? next() : res.status(400).json({ error: "Id invalide" })));
 // L'interface (HTML/JS/CSS sans build) : /admin
 router.use(express.static(ADMIN_UI_DIR));
 
@@ -175,7 +179,7 @@ api.put("/sets/:code/rarities", async (req, res) => {
 
 // ---------- Photos ----------
 
-api.post("/sets/:code/photos", upload.array("photos", 200), async (req, res) => {
+api.post("/sets/:code/photos", upload.array("photos", 20), async (req, res) => {
   const set = await getSet(req.params.code);
   if (!req.files?.length) throw new HttpError(400, "Aucune photo reçue (formats image seulement)");
 
@@ -186,14 +190,17 @@ api.post("/sets/:code/photos", upload.array("photos", 200), async (req, res) => 
   const failed = [];
   for (const file of req.files) {
     try {
-      // rotate() : applique l'orientation EXIF des photos de téléphone ; 800 px de large max
-      const webp = await sharp(file.buffer)
-        .rotate()
-        .resize({ width: 800, withoutEnlargement: true })
-        .webp({ quality: 85 })
-        .toBuffer();
-      const imageFile = `${randomUUID()}.webp`;
+      // rotate() : applique l'orientation EXIF des photos de téléphone.
+      // 800 px pour le guide ; une copie 1600 px (.hd.webp) pour que Claude lise les petits codes.
+      const oriented = sharp(file.buffer).rotate();
+      const [webp, hd] = await Promise.all([
+        oriented.clone().resize({ width: 800, withoutEnlargement: true }).webp({ quality: 85 }).toBuffer(),
+        oriented.clone().resize({ width: 1600, withoutEnlargement: true }).webp({ quality: 90 }).toBuffer(),
+      ]);
+      const id = randomUUID();
+      const imageFile = `${id}.webp`;
       await writeFile(join(dir, imageFile), webp);
+      await writeFile(join(dir, `${id}.hd.webp`), hd);
       const { rows } = await pool.query(
         `INSERT INTO import_items (set_code, image_file, original_filename) VALUES ($1, $2, $3) RETURNING *`,
         [set.code, imageFile, file.originalname.slice(0, 200)],
@@ -241,7 +248,9 @@ api.delete("/items/:id", async (req, res) => {
   if (!rows[0]) throw new HttpError(404, "Photo introuvable");
   // Set déjà publié : la photo reste, une carte en ligne l'utilise peut-être encore
   if (rows[0].status === "draft") {
-    await unlink(join(IMAGES_DIR, rows[0].set_code, rows[0].image_file)).catch(() => {});
+    const file = join(IMAGES_DIR, rows[0].set_code, rows[0].image_file);
+    await unlink(file).catch(() => {});
+    await unlink(file.replace(/\.webp$/, ".hd.webp")).catch(() => {});
   }
   res.status(204).end();
 });
@@ -280,7 +289,11 @@ api.post("/sets/:code/products", async (req, res) => {
     for (const card of cards) {
       const query = `${card.rarity}-${card.number}`;
       if (!cache.has(query)) cache.set(query, await services.searchProducts(query));
-      const { match, candidates } = matchProduct(cache.get(query), { ...card, setCode: set.code });
+      const { match, candidates } = matchProduct(cache.get(query), {
+        ...card,
+        setCode: set.code,
+        gameName: set.game_name,
+      });
       if (card.product_url) summary.kept++;
       else if (match) {
         summary.matched++;
@@ -300,6 +313,7 @@ api.post("/sets/:code/products", async (req, res) => {
       rarity: item.rarity,
       number: item.number,
       setCode: set.code,
+      gameName: set.game_name,
     });
 
     // Un lien déjà choisi à la main n'est jamais écrasé
@@ -365,11 +379,19 @@ api.post("/sets/:code/publish", async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query("DELETE FROM cards WHERE set_code = $1", [set.code]);
+    // Seules les cartes créées par /admin (photo dans images/<SET>/) qui n'ont plus de photo sont retirées.
+    // Les cartes venues d'ailleurs (ex. les 151 de JJK-01 du seed) ne sont jamais supprimées ici.
+    await client.query(
+      `DELETE FROM cards WHERE set_code = $1 AND image_url LIKE $2 AND NOT (id = ANY($3))`,
+      [set.code, `/images/${set.code}/%`, [...ids.keys()]],
+    );
     for (const item of items) {
       await client.query(
         `INSERT INTO cards (id, name, set_code, number, rarity, image_url, product_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name, number = EXCLUDED.number, rarity = EXCLUDED.rarity,
+           image_url = EXCLUDED.image_url, product_url = EXCLUDED.product_url`,
         [
           cardId(set.code, item.rarity, item.number),
           item.name,

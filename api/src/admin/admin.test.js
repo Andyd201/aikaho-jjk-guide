@@ -125,6 +125,8 @@ describe("Workflow d'import", () => {
     expect(res.body.created).toHaveLength(3);
     expect(existsSync(join(IMAGES_DIR, "TST-03", res.body.created[0].image_file))).toBe(true);
     expect(res.body.created[0].image_file).toMatch(/\.webp$/);
+    // Copie HD pour la lecture par Claude
+    expect(existsSync(join(IMAGES_DIR, "TST-03", res.body.created[0].image_file.replace(".webp", ".hd.webp")))).toBe(true);
 
     await kickQueue();
 
@@ -165,7 +167,7 @@ describe("Workflow d'import", () => {
     setServices({
       searchProducts: async (query) =>
         query === "SSR-012"
-          ? [{ name: "Satoru Gojo SSR-012 TST-03", url: "https://shop.test/gojo-ssr-012" }]
+          ? [{ name: "Satoru Gojo SSR-012 TST-03", url: "https://shop.test/gojo-ssr-012" }, { name: "Naruto SSR-012", url: "https://shop.test/naruto" }]
           : [{ name: "Yuji R-001", url: "https://shop.test/yuji-a" }, { name: "Yuji R-001 holo", url: "https://shop.test/yuji-b" }],
     });
     const res = await admin("post", "/sets/TST-03/products");
@@ -234,6 +236,31 @@ describe("Workflow d'import", () => {
     expect((await request(app).get("/sets/TST-03")).status).toBe(404);
     const { body: sets } = await admin("get", "/sets");
     expect(sets.find((s) => s.code === "TST-03")).toMatchObject({ status: "draft", card_count: 2 });
+  });
+
+  it("publier un set qui a déjà des cartes (seed) ne les supprime pas", async () => {
+    // JJK-01 : une carte venue du seed + une photo importée de la même carte et d'une nouvelle
+    await pool.query(
+      `INSERT INTO cards (id, name, set_code, number, rarity, image_url)
+       VALUES ('JJK01-R-001', 'Sukuna', 'JJK-01', '001', 'R', '/images/photo01_carte01.webp'),
+              ('JJK01-R-002', 'Panda', 'JJK-01', '002', 'R', '/images/photo01_carte02.webp')`,
+    );
+    const upload = await admin("post", "/sets/JJK-01/photos").attach("photos", await png("gojo.jpg"), "gojo.jpg");
+    await kickQueue();
+    const item = upload.body.created[0];
+    // Meilleure photo de Sukuna (R-001)
+    await admin("patch", `/items/${item.id}`).send({ name: "Sukuna", rarity: "R", number: "001", validated: true });
+
+    const res = await admin("post", "/sets/JJK-01/publish");
+    expect(res.status).toBe(200);
+    const cards = await request(app).get("/sets/JJK-01/cards");
+    expect(cards.body.map((c) => c.id)).toEqual(["JJK01-R-001", "JJK01-R-002"]);
+    expect(cards.body[0].image_url).toBe(`/images/JJK-01/${item.image_file}`);
+    expect(cards.body[1].image_url).toBe("/images/photo01_carte02.webp");
+  });
+
+  it("id de photo invalide : 400", async () => {
+    expect((await admin("patch", "/items/abc").send({})).status).toBe(400);
   });
 
   it("503 clair si WooCommerce n'est pas configuré", async () => {
