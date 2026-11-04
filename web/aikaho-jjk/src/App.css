@@ -413,3 +413,154 @@ main {
 .rarity-table td {
   color: var(--text);
 }
+
+/* ---------- En-tête d'un set : le nom du set est plus long que « Card Guide » ---------- */
+
+.hero-set .back-link {
+  margin-bottom: 20px;
+}
+
+.hero-set h1 {
+  font-size: clamp(2rem, 6vw, 3.8rem);
+}
+
+/* ---------- Accueil : sets regroupés par jeu, une ligne « ticker » par set ---------- */
+
+.sets {
+  margin-top: 48px;
+}
+
+.game + .game {
+  margin-top: 48px;
+}
+
+.game-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.game-title span {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.set-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.set-ticker {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 18px 12px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s;
+}
+
+/* Barre rouge à gauche au survol, comme le sceau de la bannière */
+.set-ticker::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  background: var(--crimson);
+  border-radius: 2px;
+  transform: scaleY(0);
+  transition: transform 0.2s;
+}
+
+.set-ticker:hover,
+.set-ticker:focus-visible {
+  background: linear-gradient(90deg, rgba(215, 38, 61, 0.1), transparent 70%);
+}
+
+.set-ticker:hover::before,
+.set-ticker:focus-visible::before {
+  transform: scaleY(1);
+}
+
+/* Code du set en étiquette, chiffres alignés comme un symbole boursier */
+.set-code {
+  min-width: 6.5em;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  border: 1px solid rgba(230, 194, 122, 0.4);
+  border-radius: 3px;
+}
+
+.set-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.set-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.set-count {
+  color: var(--text);
+}
+
+.set-arrow {
+  color: var(--muted);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.set-ticker:hover .set-arrow {
+  color: var(--crimson);
+  transform: translateX(3px);
+}
+
+/* Mobile : code + flèche en haut, nom et infos en dessous */
+@media (max-width: 600px) {
+  .set-ticker {
+    grid-template-columns: auto 1fr;
+    padding: 16px 8px 16px 12px;
+  }
+
+  .set-arrow {
+    justify-self: end;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .set-name,
+  .set-meta {
+    grid-column: 1 / -1;
+  }
+
+  .set-code {
+    justify-self: start;
+  }
+}

@@ -1,13 +1,16 @@
 import { Link } from "react-router";
 import { API_URL } from "../api.js";
-import { SET_NAME } from "../config.js";
 
-function CardTile({ card }) {
+function CardTile({ card, setName }) {
   return (
-    <Link to={`/cards/${card.id}`} className="card-tile" data-rarity={card.rarity}>
+    <Link
+      to={`/sets/${card.set_code}/cards/${card.id}`}
+      className="card-tile"
+      data-rarity={card.rarity}
+    >
       <img
         src={`${API_URL}${card.image_url}`}
-        alt={`${card.name} – ${SET_NAME} ${card.rarity} card`}
+        alt={`${card.name} – ${setName} ${card.rarity} card`}
         loading="lazy"
         width={197}
         height={274}
