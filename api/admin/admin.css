@@ -51,3 +51,4 @@ td input.url { width: 220px; }
 dialog { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
 dialog img { max-width: 80vw; max-height: 85vh; display: block; }
 .table-wrap { overflow-x: auto; }
+.secondary-link { display: inline-block; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--text); text-decoration: none; font-weight: 600; }

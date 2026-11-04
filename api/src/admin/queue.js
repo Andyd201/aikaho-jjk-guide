@@ -55,7 +55,7 @@ async function processItem(item) {
          status = 'done', error = NULL,
          name = $2, name_original = $3, rarity = $4, number = $5,
          printed_code = $6, confidence = $7, notes = $8, updated_at = now()
-       WHERE id = $1`,
+       WHERE id = $1 AND status = 'processing'`,
       [
         item.id,
         card.name?.trim() || null,
@@ -70,7 +70,7 @@ async function processItem(item) {
   } catch (err) {
     console.error(`Import ${item.id} : lecture échouée :`, err.message);
     await pool.query(
-      `UPDATE import_items SET status = 'error', error = $2, updated_at = now() WHERE id = $1`,
+      `UPDATE import_items SET status = 'error', error = $2, updated_at = now() WHERE id = $1 AND status = 'processing'`,
       [item.id, err.message.slice(0, 500)],
     );
   }

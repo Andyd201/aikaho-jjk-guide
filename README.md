@@ -173,7 +173,13 @@ Pour ajouter un set au guide, plus besoin de CSV : tout se fait sur `https://api
    automatiquement ; plusieurs = tu choisis dans la liste. Sans produit, la fiche mène à la page du set.
    Ça marche aussi pour JJK-01 (cartes déjà en ligne).
 5. **Vérifier** : corrige les champs au besoin, coche « Validée » (ou « Valider toutes les cartes sûr »).
-   Les lignes surlignées sont à vérifier en priorité.
+   Les lignes surlignées sont à vérifier en priorité. Plus rapide pour un gros set :
+   - **« Exporter en CSV »**, corriger dans Excel ou Google Sheets, puis **« Importer un CSV »** :
+     les lignes importées sont validées d'un coup (colonne `valide` vide = oui) ;
+   - le CSV peut aussi être écrit à la main, avec la colonne `fichier` (nom de la photo envoyée) au lieu de `photo_id` :
+     colonnes `fichier`, `nom`, `nom_original`, `rarete`, `numero`, `lien_produit`, `valide` ;
+   - une erreur dans le CSV annule tout l'import et donne la liste des lignes à corriger ;
+   - **« Tout valider »** valide toutes les photos lues sans les vérifier une par une.
 6. **Publier** : refusé tant qu'une carte n'est pas lue et validée, ou qu'une rareté manque dans l'ordre.
    Le set apparaît tout de suite dans le guide ; Render reconstruit le sitemap (deploy hook).
 
