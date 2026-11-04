@@ -5,6 +5,7 @@ import cardsRouter from "./routes/cards.js";
 import setsRouter from "./routes/sets.js";
 import adminRouter from "./admin/router.js";
 import { IMAGES_DIR } from "./config.js";
+import { STARTED_AT, readVersion } from "./version.js";
 
 export const app = express();
 
@@ -28,10 +29,11 @@ app.use("/admin", adminRouter);
 app.get("/health", async (req, res) => {
   try {
     await pool.query("SELECT 1");
-    res.json({ status: "ok" });
+    // version : le commit en ligne (vérifier un déploiement sans se connecter au Pi)
+    res.json({ status: "ok", version: readVersion(), started_at: STARTED_AT });
   } catch (err) {
     console.error("Health check échoué :", err.code || err.message);
-    res.status(503).json({ status: "error", db: "unreachable" });
+    res.status(503).json({ status: "error", db: "unreachable", version: readVersion(), started_at: STARTED_AT });
   }
 });
 

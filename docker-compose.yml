@@ -26,6 +26,8 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       IMAGES_DIR: /app/images
+      # /health affiche le commit en ligne, lu dans le .git du repo (monté en lecture seule)
+      GIT_DIR_HOST: /app/.git-host
       # Page /admin (import des sets) : voir la section « Import d'un set » du README
       CF_ACCESS_TEAM_DOMAIN: ${CF_ACCESS_TEAM_DOMAIN:-}
       CF_ACCESS_AUD: ${CF_ACCESS_AUD:-}
@@ -38,6 +40,7 @@ services:
     volumes:
       # En écriture : /admin y range les photos des nouveaux sets (images/<SET>/)
       - ./images:/app/images
+      - ./.git:/app/.git-host:ro
     ports:
       - "127.0.0.1:${API_PORT}:${API_PORT}"
     depends_on:
