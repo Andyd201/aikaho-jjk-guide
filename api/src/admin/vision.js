@@ -1,7 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 // Lecture d'une photo de carte par Claude (API Anthropic, clé ANTHROPIC_API_KEY dans .env).
-// Le modèle est obligé d'appeler l'outil record_card : la réponse est toujours un JSON structuré.
+// On demande à Claude d'appeler l'outil record_card (réponse en JSON structuré).
+// tool_choice reste « auto » : certains modèles refusent qu'on force un outil (erreur 400).
+// Si Claude répond en texte, on récupère le JSON dans le texte.
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5";
 
 const RECORD_CARD_TOOL = {
@@ -65,7 +67,7 @@ export async function readCard(imageBuffer, context) {
     model: MODEL,
     max_tokens: 1024,
     tools: [RECORD_CARD_TOOL],
-    tool_choice: { type: "tool", name: "record_card" },
+    tool_choice: { type: "auto" },
     messages: [
       {
         role: "user",
@@ -76,14 +78,34 @@ export async function readCard(imageBuffer, context) {
           },
           {
             type: "text",
-            text: `Voici la photo d'une carte à collectionner.\n${hints}\n\nLis le code de rareté et le numéro imprimés sur la carte, et identifie le personnage. N'invente rien : si une information est illisible, mets confidence à low et explique dans notes.`,
+            text: `Voici la photo d'une carte à collectionner.\n${hints}\n\nLis le code de rareté et le numéro imprimés sur la carte, et identifie le personnage. N'invente rien : si une information est illisible, mets confidence à low et explique dans notes.\n\nRéponds UNIQUEMENT en appelant l'outil record_card.`,
           },
         ],
       },
     ],
   });
 
-  const toolUse = response.content.find((block) => block.type === "tool_use");
-  if (!toolUse) throw new Error("Réponse de Claude sans record_card");
-  return toolUse.input;
+  return extractCard(response);
+}
+
+// Le résultat de record_card ; sinon le premier objet JSON trouvé dans le texte de la réponse
+export function extractCard(response) {
+  const toolUse = response.content.find((block) => block.type === "tool_use" && block.name === "record_card");
+  if (toolUse) return toolUse.input;
+
+  const text = response.content
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join("\n");
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end > start) {
+    try {
+      const card = JSON.parse(text.slice(start, end + 1));
+      if (card && typeof card === "object" && (card.name || card.rarity)) return card;
+    } catch {
+      /* plus bas */
+    }
+  }
+  throw new Error("Claude n'a pas renvoyé les infos de la carte : clique « Relancer »");
 }

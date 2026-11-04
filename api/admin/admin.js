@@ -521,8 +521,27 @@ function publishPanel(set) {
     h("h2", {}, "6. Publier"),
     h("p", { class: "muted" }, "Toutes les photos doivent être lues et validées, et chaque rareté doit être dans l'ordre des raretés."),
     h("div", { class: "row" }, publish, unpublish),
+    set.status === "draft" && deleteSetBlock(set),
     problems,
   );
+}
+
+function deleteSetBlock(set) {
+  const button = h("button", {
+    class: "danger",
+    onclick: () => {
+      const typed = prompt(
+        `Supprimer ${set.code} pour de bon ? Cartes, raretés et photos seront effacées (récupérables seulement depuis un backup).\n\nRetape le code du set pour confirmer :`,
+      );
+      if (typed === null) return;
+      busy(button, async () => {
+        await api(`/sets/${encodeURIComponent(set.code)}`, { method: "DELETE", body: { confirm: typed.trim() } });
+        toast(`${set.code} supprimé`);
+        location.hash = "#/";
+      });
+    },
+  }, "Supprimer le set");
+  return h("div", { class: "row", style: "margin-top: 16px" }, button);
 }
 
 function zoom(src) {

@@ -182,6 +182,9 @@ Pour ajouter un set au guide, plus besoin de CSV : tout se fait sur `https://api
    - **« Tout valider »** valide toutes les photos lues sans les vérifier une par une.
 6. **Publier** : refusé tant qu'une carte n'est pas lue et validée, ou qu'une rareté manque dans l'ordre.
    Le set apparaît tout de suite dans le guide ; Render reconstruit le sitemap (deploy hook).
+7. **Supprimer un set** (en bas de la page du set) : seulement s'il est en brouillon (« Retirer du guide » d'abord),
+   en retapant son code. Cartes, raretés, photos et dossier `images/<SET>/` sont effacés, et le jeu aussi s'il
+   n'a plus de set. Récupérable seulement depuis un backup (`~/backups/aikaho-jjk/`).
 
 Sécurité : `/admin` est protégé par **Cloudflare Access** (connexion par courriel, avant même d'arriver au Pi).
 L'API vérifie en plus le jeton signé par Cloudflare (`CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`) ; sans ces
