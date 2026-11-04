@@ -1,13 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { join } from "node:path";
 import { pool } from "./db.js";
 import cardsRouter from "./routes/cards.js";
 import setsRouter from "./routes/sets.js";
-
-// Dans Docker : /app/images (via docker-compose). En local : <racine du repo>/images
-const IMAGES_DIR =
-  process.env.IMAGES_DIR ?? join(import.meta.dirname, "../../images");
+import adminRouter from "./admin/router.js";
+import { IMAGES_DIR } from "./config.js";
 
 export const app = express();
 
@@ -24,6 +21,9 @@ const origins = parseOrigins(process.env.CORS_ORIGIN);
 // Aucune origine configurée : comportement par défaut de cors (toutes les origines), comme avant
 app.use(cors(origins.length ? { origin: origins } : {}));
 app.use(express.json());
+
+// Page d'import des sets : protégée par Cloudflare Access (voir src/admin/auth.js)
+app.use("/admin", adminRouter);
 
 app.get("/health", async (req, res) => {
   try {

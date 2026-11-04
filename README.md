@@ -148,6 +148,30 @@ Si le domaine change, il faut ajouter une nouvelle propriété dans Search Conso
 - **`Bind for 0.0.0.0:3000 failed: port is already allocated`** : un autre programme utilise le port. Change `API_PORT` dans `.env`.
 - **L'API ne démarre pas, `Migrations échouées` dans `docker compose logs api`** : une migration a planté. Elle est annulée en entier (transaction) ; corrige-la, ou restaure le dernier backup.
 
+## Import d'un set (`/admin`)
+
+Pour ajouter un set au guide, plus besoin de CSV : tout se fait sur `https://api-jjk.andydouangpanya.com/admin/`.
+
+1. **Nouveau set** : jeu, code (ex. `JJK-02`), nom, page Eyesight du set (booster box ou catégorie).
+2. **Photos** : glisse les photos (une carte par photo). L'API les convertit en WebP 800 px (`images/<SET>/`),
+   puis **Claude Vision** lit chaque carte : nom, nom imprimé, rareté, numéro, et un niveau de confiance.
+3. **Ordre des raretés** : « Proposer à partir des photos » classe les raretés de la moins nombreuse à la plus
+   nombreuse. Vérifie l'ordre, puis enregistre.
+4. **Produits Eyesight** : chaque code (ex. `SSR-012`) est cherché dans WooCommerce. Un seul produit trouvé = choisi
+   automatiquement ; plusieurs = tu choisis dans la liste. Sans produit, la fiche mène à la page du set.
+   Ça marche aussi pour JJK-01 (cartes déjà en ligne).
+5. **Vérifier** : corrige les champs au besoin, coche « Validée » (ou « Valider toutes les cartes sûr »).
+   Les lignes surlignées sont à vérifier en priorité.
+6. **Publier** : refusé tant qu'une carte n'est pas lue et validée, ou qu'une rareté manque dans l'ordre.
+   Le set apparaît tout de suite dans le guide ; Render reconstruit le sitemap (deploy hook).
+
+Sécurité : `/admin` est protégé par **Cloudflare Access** (connexion par courriel, avant même d'arriver au Pi).
+L'API vérifie en plus le jeton signé par Cloudflare (`CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`) ; sans ces
+variables, `/admin` reste fermé. En local : `ADMIN_DEV_BYPASS=1` dans `.env` (ignoré en production).
+
+Variables (dans le `.env` du Pi, jamais dans Git) : voir la section « Page /admin » de `.env.example`.
+Les photos importées ne sont pas dans Git : `backup.sh` les sauvegarde (`images_<date>.tar.gz`).
+
 ## Contribuer
 
 Une branche par issue, commits conventionnels (`feat:`, `fix:`, `chore:`…), PR vers `master` avec `Closes #N` dans la description.

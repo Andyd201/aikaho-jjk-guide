@@ -4,3 +4,6 @@ dist/
 
 # Dernier commit déployé avec succès sur le Pi (api/scripts/deploy.sh)
 .deployed-sha
+
+# Photos importées par /admin (images/<SET>/) : elles vivent sur le Pi, sauvegardées par backup.sh
+images/*/
