@@ -3,7 +3,7 @@ import multer from "multer";
 import { parse as parseCsv } from "csv-parse/sync";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, rm, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pool } from "../db.js";
 import { IMAGES_DIR } from "../config.js";
@@ -553,6 +553,47 @@ api.post("/sets/:code/unpublish", async (req, res) => {
   const set = await getSet(req.params.code);
   await pool.query("UPDATE sets SET status = 'draft' WHERE code = $1", [set.code]);
   res.json({ status: "draft", frontRebuild: await triggerFrontRebuild() });
+});
+
+// Supprimer un set : seulement en brouillon (« Retirer du guide » d'abord), et il faut retaper son code.
+// Efface les cartes, les raretés, les photos importées (BD + dossier images/<SET>/).
+// Le jeu est aussi effacé s'il n'a plus aucun set. Récupérable seulement depuis un backup.
+api.delete("/sets/:code", async (req, res) => {
+  const set = await getSet(req.params.code);
+  if (set.status === "published") {
+    throw new HttpError(409, "Set encore en ligne : clique d'abord « Retirer du guide »");
+  }
+  if (req.body?.confirm !== set.code) {
+    throw new HttpError(400, `Pour confirmer, retape le code du set (${set.code})`);
+  }
+
+  const client = await pool.connect();
+  let counts;
+  try {
+    await client.query("BEGIN");
+    const { rows } = await client.query(
+      `SELECT (SELECT COUNT(*)::int FROM cards WHERE set_code = $1) AS cards,
+              (SELECT COUNT(*)::int FROM import_items WHERE set_code = $1) AS photos`,
+      [set.code],
+    );
+    counts = rows[0];
+    // cards, rarities et import_items suivent (ON DELETE CASCADE)
+    await client.query("DELETE FROM sets WHERE code = $1", [set.code]);
+    await client.query(
+      "DELETE FROM games g WHERE g.code = $1 AND NOT EXISTS (SELECT 1 FROM sets s WHERE s.game_code = g.code)",
+      [set.game_code],
+    );
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+
+  // Le code est validé par SET_CODE à la création : le chemin reste dans IMAGES_DIR
+  await rm(join(IMAGES_DIR, set.code), { recursive: true, force: true });
+  res.json({ deleted: set.code, ...counts });
 });
 
 // Erreurs de l'admin : messages lisibles plutôt que « Erreur serveur »

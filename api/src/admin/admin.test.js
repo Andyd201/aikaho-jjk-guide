@@ -323,6 +323,36 @@ describe("Workflow d'import", () => {
     expect((await admin("patch", "/items/abc").send({})).status).toBe(400);
   });
 
+  it("supprimer un set : refusé tant qu'il est en ligne ou sans confirmation", async () => {
+    await admin("post", "/sets").send({ code: "DEL-01", name: "À supprimer", game_code: "DEL-GAME", game_name: "Jeu à supprimer" });
+    await admin("put", "/sets/DEL-01/rarities").send({ order: ["R"] });
+    const up = await admin("post", "/sets/DEL-01/photos").attach("photos", await png("yuji.jpg"), "yuji.jpg");
+    await kickQueue();
+    await admin("patch", `/items/${up.body.created[0].id}`).send({ name: "X", rarity: "R", number: "1", validated: true });
+    expect((await admin("post", "/sets/DEL-01/publish")).status).toBe(200);
+
+    expect((await admin("delete", "/sets/DEL-01").send({ confirm: "DEL-01" })).status).toBe(409);
+    await admin("post", "/sets/DEL-01/unpublish");
+    expect((await admin("delete", "/sets/DEL-01").send({ confirm: "mauvais" })).status).toBe(400);
+    expect((await admin("delete", "/sets/DEL-01").send({})).status).toBe(400);
+  });
+
+  it("supprimer un set efface cartes, raretés, photos, dossier et le jeu devenu vide", async () => {
+    const res = await admin("delete", "/sets/DEL-01").send({ confirm: "DEL-01" });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ deleted: "DEL-01", cards: 1, photos: 1 });
+    expect(existsSync(join(IMAGES_DIR, "DEL-01"))).toBe(false);
+    const { rows } = await pool.query(
+      `SELECT (SELECT COUNT(*) FROM cards WHERE set_code = 'DEL-01')::int AS cards,
+              (SELECT COUNT(*) FROM rarities WHERE set_code = 'DEL-01')::int AS rarities,
+              (SELECT COUNT(*) FROM games WHERE code = 'DEL-GAME')::int AS games`,
+    );
+    expect(rows[0]).toEqual({ cards: 0, rarities: 0, games: 0 });
+    expect((await admin("get", "/sets/DEL-01")).status).toBe(404);
+    // Les autres sets ne sont pas touchés
+    expect((await admin("get", "/sets/TST-03")).status).toBe(200);
+  });
+
   it("503 clair si WooCommerce n'est pas configuré", async () => {
     setServices({ wooConfigured: () => false });
     const res = await admin("post", "/sets/TST-03/products");
