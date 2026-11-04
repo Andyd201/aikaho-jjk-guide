@@ -1,0 +1,9 @@
+# Variables qui doivent exister (non vides) dans le .env du Pi.
+# deploy.sh lit la version de ce fichier qui est sur master AVANT de déployer :
+# si une variable manque, il refuse de déployer au lieu de casser le site.
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+API_PORT
+CORS_ORIGIN
+TUNNEL_TOKEN

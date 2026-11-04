@@ -10,7 +10,18 @@ const IMAGES_DIR =
 
 export const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN }));
+// CORS_ORIGIN peut contenir plusieurs origines séparées par des virgules
+// (ex. l'URL onrender.com et le futur domaine, le temps de la transition)
+export function parseOrigins(value) {
+  return (value ?? "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+}
+
+const origins = parseOrigins(process.env.CORS_ORIGIN);
+// Aucune origine configurée : comportement par défaut de cors (toutes les origines), comme avant
+app.use(cors(origins.length ? { origin: origins } : {}));
 app.use(express.json());
 
 app.get("/health", async (req, res) => {

@@ -150,23 +150,54 @@ Une branche par issue, commits conventionnels (`feat:`, `fix:`, `chore:`…), PR
 | Partie | Où | URL |
 |---|---|---|
 | Front | Render (site statique, redéployé à chaque merge sur `master`) | https://aikaho-jjk-guide.onrender.com |
-| API + BD | Raspberry Pi 4, `docker compose` | Quick Tunnel Cloudflare (`*.trycloudflare.com`) |
+| API + BD | Raspberry Pi 4, `docker compose` | Tunnel Cloudflare nommé : https://api-jjk.andydouangpanya.com |
 
 ### Mettre en route sur le Pi
 ```bash
 git clone https://github.com/Andyd201/aikaho-jjk-guide.git && cd aikaho-jjk-guide
-cp .env.example .env          # mettre un vrai mot de passe et CORS_ORIGIN=https://aikaho-jjk-guide.onrender.com
+cp .env.example .env          # vrai mot de passe, CORS_ORIGIN, TUNNEL_TOKEN
 docker compose up -d --build
 docker compose run --rm -v ./data:/data:ro api node scripts/seed.js   # → 151 cartes insérées
 ```
 
-### Si le Pi redémarre
-L'URL du Quick Tunnel change. Pour remettre le guide en ligne :
-1. `docker compose logs tunnel | grep trycloudflare | tail -1` → copier la nouvelle URL
-2. Render → Environment → mettre à jour `VITE_API_URL`
-3. Render → Manual Deploy → **Clear build cache & deploy**
+### Tunnel nommé
+L'URL de l'API ne change plus quand le Pi redémarre : le guide revient tout seul après une panne de courant.
+- Cloudflare Zero Trust → Networks → Tunnels → tunnel `aikaho-pi`
+- Public hostname `api-jjk.andydouangpanya.com` → `http://api:3000`
+- Le token du tunnel va dans `.env` (`TUNNEL_TOKEN=...`), jamais dans Git
+
+### Déploiement automatique
+`api/scripts/deploy.sh` roule aux 5 minutes avec cron. S'il y a du nouveau sur `master`, il fait :
+1. vérifier que le Pi n'a pas de commits locaux et que les variables de `api/scripts/required-env.txt` sont dans `.env` (sinon il **annule** sans rien toucher) ;
+2. un backup de la BD (`predeploy_<date>.sql.gz`, gardés à part des backups quotidiens) ;
+3. `git merge --ff-only`, puis `docker compose build`. **Si le build plante, il revient au code d'avant** : le site ne bouge pas ;
+4. `docker compose up -d`, puis vérifier `/health`. Le commit est noté dans `.deployed-sha` seulement si `/health` répond.
+
+Tant qu'un déploiement n'a pas réussi, il est retenté au passage suivant (aux 5 minutes).
+
+Installation (une seule fois) : `crontab -e`, puis ajouter :
+```
+*/5 * * * * /home/andy/aikaho-jjk-guide/api/scripts/deploy.sh >> /home/andy/backups/aikaho-jjk/deploy.log 2>&1
+```
+Suivre les déploiements : `tail -f ~/backups/aikaho-jjk/deploy.log`
+
+Quand une PR ajoute une variable à `required-env.txt`, ajoute-la dans le `.env` du Pi **avant** de merger, sinon le déploiement est annulé (le site reste sur l'ancienne version).
+
+### Restaurer après un déploiement raté
+Une migration peut changer le schéma : revenir à l'ancien code ne suffit pas, il faut aussi la BD d'avant.
+```bash
+cd ~/aikaho-jjk-guide
+docker compose logs --tail 50 api                       # comprendre l'erreur
+git reset --hard <commit-d-avant>                       # celui de .deployed-sha
+ls -t ~/backups/aikaho-jjk/predeploy_*.sql.gz | head -1 # le backup fait juste avant
+docker compose stop api
+docker compose exec -T db sh -c 'dropdb -U "$POSTGRES_USER" --force "$POSTGRES_DB" && createdb -U "$POSTGRES_USER" "$POSTGRES_DB"'
+gunzip -c ~/backups/aikaho-jjk/predeploy_<date>.sql.gz | docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"'
+docker compose up -d --build api
+```
+Puis corriger le problème dans une PR : le prochain merge sur `master` sera déployé normalement.
 
 ### ⚠️ À ne pas faire
 - `source .env` ou `set -a; . ./.env` avant un `docker compose up` : les variables du terminal
   passent avant celles du fichier `.env`, et l'API démarre avec d'anciennes valeurs.
-- `docker compose down` ou redémarrer le service `tunnel` sans raison : l'URL change.****
+- Modifier des fichiers suivis par Git directement sur le Pi : le déploiement automatique ne pourra plus faire `git merge --ff-only`.
