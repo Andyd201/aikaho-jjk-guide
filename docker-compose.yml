@@ -37,7 +37,9 @@ services:
 
   tunnel:
     image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate --url http://api:${API_PORT}
+    # Tunnel nommé : l'URL (api-jjk.andydouangpanya.com) ne change plus au redémarrage.
+    # Le hostname public → http://api:3000 se configure dans Cloudflare Zero Trust.
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
     depends_on:
       - api
     restart: unless-stopped
