@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { app } from "../app.js";
 import { pool } from "../db.js";
-import { RARITIES } from "../rarities.js";
+import { resetTestDatabase } from "../test-db.js";
 
+// JJK-01 (et ses 11 raretés) est créé par la migration multi-set
 const TEST_CARDS = [
   { id: "JJK01-ACE-001", name: "Yuta Okkotsu", rarity: "ACE", number: "001" },
   { id: "JJK01-CHR-001", name: "Satoru Gojo", rarity: "CHR", number: "001" },
@@ -16,23 +15,13 @@ const TEST_CARDS = [
 ];
 
 beforeAll(async () => {
-  // Garde-fou : le DROP TABLE ne doit jamais toucher la vraie base
-  if (!process.env.DATABASE_URL?.includes("_test")) {
-    throw new Error("DATABASE_URL doit pointer vers une base *_test");
-  }
-
-  await pool.query("DROP TABLE IF EXISTS cards");
-  const initSql = readFileSync(
-    join(import.meta.dirname, "../../../db/init.sql"),
-    "utf8",
-  );
-  await pool.query(initSql);
+  await resetTestDatabase();
 
   for (const card of TEST_CARDS) {
     await pool.query(
-      `INSERT INTO cards (id, name, set_code, number, rarity, rarity_rank)
-       VALUES ($1, $2, 'JJK-01', $3, $4, $5)`,
-      [card.id, card.name, card.number, card.rarity, RARITIES.indexOf(card.rarity) + 1],
+      `INSERT INTO cards (id, name, set_code, number, rarity)
+       VALUES ($1, $2, 'JJK-01', $3, $4)`,
+      [card.id, card.name, card.number, card.rarity],
     );
   }
 });
@@ -113,7 +102,7 @@ describe("GET /cards", () => {
 });
 
 describe("GET /cards/:id", () => {
-  it("retourne la carte demandée", async () => {
+  it("retourne la carte demandée, avec le lien produit du set par défaut", async () => {
     const res = await request(app).get("/cards/JJK01-SE-001");
 
     expect(res.status).toBe(200);
@@ -125,6 +114,8 @@ describe("GET /cards/:id", () => {
       rarity: "SE",
       rarity_rank: 1,
       image_url: null,
+      product_url:
+        "https://eyesightcollectibles.com/product/aikaho-jujutsu-kaisen-jjk-01-booster-box-anime-trading-cards/",
     });
   });
 
@@ -132,17 +123,6 @@ describe("GET /cards/:id", () => {
     const res = await request(app).get("/cards/JJK99-R-999");
 
     expect(res.status).toBe(404);
-  });
-});
-
-describe("GET /rarities", () => {
-  it("retourne les 11 raretés avec leur rang", async () => {
-    const res = await request(app).get("/rarities");
-
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveLength(11);
-    expect(res.body[0]).toEqual({ code: "SE", rank: 1 });
-    expect(res.body[10]).toEqual({ code: "R", rank: 11 });
   });
 });
 

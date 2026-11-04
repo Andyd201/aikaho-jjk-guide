@@ -16,7 +16,7 @@ Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **
 
 ```
 api/              API Express (Dockerfile, src/)
-db/init.sql       Schéma de la BD, exécuté au premier démarrage de Postgres
+api/migrations/   Schéma de la BD (migrations, appliquées au démarrage de l'API)
 data/cards.csv    Données des cartes du set JJK-01 (id,image_file,rarity,number,name)
 images/           Photos des cartes (WebP), montées dans le conteneur api sur /app/images
 web/aikaho-jjk/   Front React + Vite
@@ -73,34 +73,40 @@ Garde le mot de passe alphanumérique : il est inséré tel quel dans l'URL de c
 
 ## Base de données
 
-Table `cards` :
+| Table | Contenu |
+|---|---|
+| `games` | Jeux (ex. `AIKAHO-JJK` « Aikaho Jujutsu Kaisen ») |
+| `sets` | Sets d'un jeu : `code`, `name`, `release_date`, `product_url` (page Eyesight du set), `status` (`draft` dans `/admin`, `published` dans le guide) |
+| `rarities` | Raretés **d'un set** avec leur rang (1 = la plus rare) |
+| `cards` | Cartes : `id` (ex. `JJK01-SSR-001`), `name`, `set_code`, `number` (recommence à `001` dans chaque rareté), `rarity`, `image_url`, `product_url` (produit Eyesight de la carte, optionnel) |
 
-| Colonne | Type | Notes |
-|---|---|---|
-| `id` | text | Clé primaire, vient du CSV (ex. `JJK01-SSR-001`) |
-| `name` | text | |
-| `set_code` | text | ex. `JJK-01` |
-| `number` | text | Numéro dans la rareté (recommence à `001` pour chaque rareté) |
-| `rarity` | text | Une des 11 raretés (contrainte `CHECK`) |
-| `rarity_rank` | int | 1 (la plus rare) à 11 (la plus commune) |
-| `description` | text | Optionnel |
-| `image_url` | text | Optionnel |
-| `created_at` | timestamptz | Rempli automatiquement |
+Ordre des raretés de JJK-01 (rang 1 → 11) : SE, ACE, CHR, UTR, TQR, SAR, QR, SSR, SR, RRR, R
 
-Ordre des raretés (`rarity_rank` 1 → 11) :
-SE, ACE, CHR, UTR, TQR, SAR, QR, SSR, SR, RRR, R
+### Migrations
+Le schéma vit dans `api/migrations/` ([node-pg-migrate](https://salsita.github.io/node-pg-migrate/)).
+L'API applique les migrations manquantes **à son démarrage** : après un déploiement, la BD est toujours à jour.
 
-> ⚠️ `db/init.sql` n'est exécuté que si le volume de données est **vide**. Après une modification du schéma, repartir à neuf avec `docker compose down -v` (efface les données).
+```bash
+cd api
+npm run migrate:create -- nom-de-la-migration   # crée api/migrations/<timestamp>_nom-de-la-migration.js
+npm run migrate                                 # applique (en local, avec DATABASE_URL du .env)
+npm run migrate:down                            # annule la dernière
+```
+Une migration déjà mergée ne se modifie jamais : on en crée une nouvelle.
 
 ## API
 
 | Route | Statut |
 |---|---|
 | `GET /health` | ✅ Disponible |
-| `GET /cards?search=&rarity=` | 🚧 Sprint 1 : recherche partielle sur le nom, filtre multi-rareté (`rarity=ACE,CHR`), tri par rareté puis numéro |
-| `GET /cards/:id` | 🚧 Sprint 1 : `404` si la carte n'existe pas |
-| `GET /rarities` | 🚧 Sprint 1 : les 11 raretés dans l'ordre |
-| `/images` | 🚧 Sprint 1 : photos des cartes (WebP ~800 px) servies en statique |
+| `GET /games` | Jeux qui ont au moins un set publié |
+| `GET /sets?game=` | Sets publiés, avec leur nombre de cartes |
+| `GET /sets/:code` | Un set + ses raretés dans l'ordre (avec le nombre de cartes) ; `404` si inexistant ou en brouillon |
+| `GET /sets/:code/rarities` | Les raretés du set dans l'ordre |
+| `GET /sets/:code/cards?search=&rarity=` | Cartes du set : recherche partielle sur le nom, filtre multi-rareté (`rarity=SE,ACE`), tri par rareté puis numéro |
+| `GET /cards?set=&search=&rarity=` | Même chose sur tous les sets publiés |
+| `GET /cards/:id` | Une carte ; `product_url` = produit de la carte, sinon celui du set ; `404` si elle n'existe pas |
+| `/images` | Photos des cartes (WebP) servies en statique |
 
 ## SEO
 
@@ -140,7 +146,7 @@ Si le domaine change, il faut ajouter une nouvelle propriété dans Search Conso
 ## Dépannage
 
 - **`Bind for 0.0.0.0:3000 failed: port is already allocated`** : un autre programme utilise le port. Change `API_PORT` dans `.env`.
-- **Ma modification de `init.sql` n'est pas appliquée** : voir l'avertissement dans la section Base de données.
+- **L'API ne démarre pas, `Migrations échouées` dans `docker compose logs api`** : une migration a planté. Elle est annulée en entier (transaction) ; corrige-la, ou restaure le dernier backup.
 
 ## Contribuer
 

@@ -3,6 +3,7 @@ import cors from "cors";
 import { join } from "node:path";
 import { pool } from "./db.js";
 import cardsRouter from "./routes/cards.js";
+import setsRouter from "./routes/sets.js";
 
 // Dans Docker : /app/images (via docker-compose). En local : <racine du repo>/images
 const IMAGES_DIR =
@@ -35,6 +36,7 @@ app.get("/health", async (req, res) => {
 });
 
 app.use(cardsRouter);
+app.use(setsRouter);
 
 app.use("/images", express.static(IMAGES_DIR, { maxAge: "7d" }));
 
