@@ -12,9 +12,9 @@ beforeAll(async () => {
 
   await pool.query(`
     INSERT INTO games (code, name) VALUES ('TEST', 'Jeu de test');
-    INSERT INTO sets (code, game_code, name, status, product_url) VALUES
-      ('TST-01', 'TEST', 'Test Set 01', 'published', 'https://example.com/tst-01'),
-      ('TST-02', 'TEST', 'Test Set 02', 'draft', NULL);
+    INSERT INTO sets (code, game_code, name, status, product_url, release_date) VALUES
+      ('TST-01', 'TEST', 'Test Set 01', 'published', 'https://example.com/tst-01', '2026-09-15'),
+      ('TST-02', 'TEST', 'Test Set 02', 'draft', NULL, NULL);
     INSERT INTO rarities (set_code, code, rank) VALUES
       ('TST-01', 'SR', 1), ('TST-01', 'C', 2),
       ('TST-02', 'C', 1);
@@ -68,6 +68,7 @@ describe("GET /sets/:code", () => {
     expect(res.status).toBe(200);
     expect(res.body.name).toBe("Test Set 01");
     expect(res.body.game_name).toBe("Jeu de test");
+    expect(res.body.release_date).toBe("2026-09-15");
     expect(res.body.rarities).toEqual([
       { code: "SR", rank: 1, card_count: 1 },
       { code: "C", rank: 2, card_count: 1 },
