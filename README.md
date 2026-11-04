@@ -168,10 +168,12 @@ L'URL de l'API ne change plus quand le Pi redémarre : le guide revient tout seu
 
 ### Déploiement automatique
 `api/scripts/deploy.sh` roule aux 5 minutes avec cron. S'il y a du nouveau sur `master`, il fait :
-1. vérifier que les variables de `api/scripts/required-env.txt` sont dans `.env` (sinon il **annule**) ;
-2. un backup de la BD ;
-3. `git merge --ff-only`, puis `docker compose up -d --build` ;
-4. vérifier `/health`.
+1. vérifier que le Pi n'a pas de commits locaux et que les variables de `api/scripts/required-env.txt` sont dans `.env` (sinon il **annule** sans rien toucher) ;
+2. un backup de la BD (`predeploy_<date>.sql.gz`, gardés à part des backups quotidiens) ;
+3. `git merge --ff-only`, puis `docker compose build`. **Si le build plante, il revient au code d'avant** : le site ne bouge pas ;
+4. `docker compose up -d`, puis vérifier `/health`. Le commit est noté dans `.deployed-sha` seulement si `/health` répond.
+
+Tant qu'un déploiement n'a pas réussi, il est retenté au passage suivant (aux 5 minutes).
 
 Installation (une seule fois) : `crontab -e`, puis ajouter :
 ```
@@ -180,6 +182,20 @@ Installation (une seule fois) : `crontab -e`, puis ajouter :
 Suivre les déploiements : `tail -f ~/backups/aikaho-jjk/deploy.log`
 
 Quand une PR ajoute une variable à `required-env.txt`, ajoute-la dans le `.env` du Pi **avant** de merger, sinon le déploiement est annulé (le site reste sur l'ancienne version).
+
+### Restaurer après un déploiement raté
+Une migration peut changer le schéma : revenir à l'ancien code ne suffit pas, il faut aussi la BD d'avant.
+```bash
+cd ~/aikaho-jjk-guide
+docker compose logs --tail 50 api                       # comprendre l'erreur
+git reset --hard <commit-d-avant>                       # celui de .deployed-sha
+ls -t ~/backups/aikaho-jjk/predeploy_*.sql.gz | head -1 # le backup fait juste avant
+docker compose stop api
+docker compose exec -T db sh -c 'dropdb -U "$POSTGRES_USER" --force "$POSTGRES_DB" && createdb -U "$POSTGRES_USER" "$POSTGRES_DB"'
+gunzip -c ~/backups/aikaho-jjk/predeploy_<date>.sql.gz | docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"'
+docker compose up -d --build api
+```
+Puis corriger le problème dans une PR : le prochain merge sur `master` sera déployé normalement.
 
 ### ⚠️ À ne pas faire
 - `source .env` ou `set -a; . ./.env` avant un `docker compose up` : les variables du terminal
