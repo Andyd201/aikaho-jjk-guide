@@ -232,6 +232,9 @@ Installation (une seule fois) : `crontab -e`, puis ajouter :
 ```
 Suivre les déploiements : `tail -f ~/backups/aikaho-jjk/deploy.log`
 
+Vérifier sans se connecter au Pi : https://api-jjk.andydouangpanya.com/health affiche `version` (le commit en ligne)
+et `started_at` (dernier redémarrage de l'API).
+
 Quand une PR ajoute une variable à `required-env.txt`, ajoute-la dans le `.env` du Pi **avant** de merger, sinon le déploiement est annulé (le site reste sur l'ancienne version).
 
 ### Restaurer après un déploiement raté
