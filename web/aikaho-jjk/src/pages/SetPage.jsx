@@ -159,6 +159,7 @@ function SetPage() {
         <EyesightBanner
           url={set.product_url}
           content={set.code}
+          campaign={set.code}
           text={`Procure-toi tes boîtes ${set.name} chez Eyesight`}
         />
       </header>

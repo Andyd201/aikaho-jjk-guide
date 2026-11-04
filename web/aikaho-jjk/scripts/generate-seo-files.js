@@ -29,12 +29,19 @@ async function getJson(path) {
 async function setsFromApi() {
   if (!VITE_API_URL) throw new Error("VITE_API_URL manquante");
   const sets = await getJson("/sets");
-  return Promise.all(
+  // Un set dont les cartes ne répondent pas est sauté (avec un avertissement), pas tout le sitemap
+  const results = await Promise.allSettled(
     sets.map(async (set) => {
       const cards = await getJson(`/sets/${encodeURIComponent(set.code)}/cards`);
       return { code: set.code, ids: cards.map((card) => card.id) };
     }),
   );
+  const ok = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
+  results.forEach((r, i) => {
+    if (r.status === "rejected") console.warn(`⚠️  Cartes de ${sets[i].code} injoignables : set absent du sitemap (${r.reason.message})`);
+  });
+  if (!ok.length && sets.length) throw new Error("aucun set n'a répondu");
+  return ok;
 }
 
 function setsFromCsv() {

@@ -103,6 +103,7 @@ function CardPage() {
           <EyesightBanner
             url={card.product_url}
             content={card.id}
+            campaign={card.set_code}
             text={
               ownProduct
                 ? "Procure-toi cette carte chez Eyesight"

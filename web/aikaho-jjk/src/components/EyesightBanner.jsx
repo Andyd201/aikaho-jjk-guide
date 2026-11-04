@@ -1,12 +1,28 @@
 import { EYESIGHT_URL } from "../config.js";
 
+// Seuls les liens https vers la boutique Eyesight sont acceptés : un lien mal tapé dans /admin
+// (ou autre chose qu'Eyesight) ne doit ni faire planter la page, ni envoyer ailleurs.
+function shopUrl(url) {
+  try {
+    const link = new URL(url);
+    const host = link.hostname.toLowerCase();
+    if (link.protocol === "https:" && (host === "eyesightcollectibles.com" || host.endsWith(".eyesightcollectibles.com"))) {
+      return link;
+    }
+  } catch {
+    /* lien invalide : lien par défaut */
+  }
+  return new URL(EYESIGHT_URL);
+}
+
 // url : product_url de la carte ou du set (sinon le lien Eyesight par défaut)
 // content : utm_content, dit quelle page a mené à la boutique (id de carte, code de set, « home »)
-function EyesightBanner({ url, content, text = "Procure-toi tes cartes chez Eyesight" }) {
-  const link = new URL(url || EYESIGHT_URL);
+// campaign : utm_campaign, un par set (ex. jjk-01) pour comparer les sets dans WooCommerce
+function EyesightBanner({ url, content, campaign = "guide", text = "Procure-toi tes cartes chez Eyesight" }) {
+  const link = shopUrl(url);
   link.searchParams.set("utm_source", "guide-jjk");
   link.searchParams.set("utm_medium", "banner");
-  link.searchParams.set("utm_campaign", "aikaho-jjk01");
+  link.searchParams.set("utm_campaign", campaign.toLowerCase());
   if (content) {
     link.searchParams.set("utm_content", content);
   }
