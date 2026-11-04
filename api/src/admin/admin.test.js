@@ -154,6 +154,58 @@ describe("Workflow d'import", () => {
     expect(existsSync(file)).toBe(false);
   });
 
+  it("exporte les photos en CSV (point-virgule, BOM pour Excel)", async () => {
+    const res = await admin("get", "/sets/TST-03/items.csv");
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toMatch(/text\/csv/);
+    expect(res.text.charCodeAt(0)).toBe(0xfeff);
+    const lines = res.text.slice(1).trim().split("\r\n");
+    expect(lines[0]).toBe("photo_id;fichier;nom;nom_original;rarete;numero;lien_produit;valide");
+    expect(lines).toHaveLength(3); // gojo + yuji (flou supprimée)
+    expect(res.text).toContain("gojo.jpg;Satoru Gojo;五条悟;SSR;012;;non");
+  });
+
+  it("importe un CSV corrigé dans Excel : met à jour et valide d'un coup", async () => {
+    const { body: set } = await admin("get", "/sets/TST-03");
+    const yuji = set.items.find((i) => i.original_filename === "yuji.jpg");
+    const csv = `\uFEFFphoto_id;fichier;nom;nom_original;rarete;numero;lien_produit;valide\r\n${yuji.id};yuji.jpg;Yuji Itadori (corrigé);;r;1;;\r\n`;
+    const res = await admin("post", "/sets/TST-03/items.csv").set("Content-Type", "text/csv").send(csv);
+    expect(res.status).toBe(200);
+    expect(res.body.updated).toBe(1);
+
+    const { body: after } = await admin("get", "/sets/TST-03");
+    expect(after.items.find((i) => i.id === yuji.id)).toMatchObject({
+      name: "Yuji Itadori (corrigé)",
+      rarity: "R",
+      number: "001",
+      validated: true,
+    });
+    // On remet comme avant pour la suite des tests
+    await admin("patch", `/items/${yuji.id}`).send({ name: "Yuji Itadori", validated: false });
+  });
+
+  it("CSV avec virgules et la colonne fichier seulement (écrit à la main)", async () => {
+    const csv = "fichier,nom,rarete,numero,valide\ngojo.jpg,Satoru Gojo,SSR,12,non\n";
+    const res = await admin("post", "/sets/TST-03/items.csv").set("Content-Type", "text/csv").send(csv);
+    expect(res.status).toBe(200);
+  });
+
+  it("CSV avec une erreur : rien n'est importé, la liste des problèmes est donnée", async () => {
+    const csv = "fichier;nom;rarete;numero;lien_produit;valide\ngojo.jpg;CHANGÉ;SSR;12;;oui\ninconnu.jpg;X;R;1;;\nyuji.jpg;Y;R;1;pas-un-lien;peut-être\n";
+    const res = await admin("post", "/sets/TST-03/items.csv").set("Content-Type", "text/csv").send(csv);
+    expect(res.status).toBe(400);
+    expect(res.body.problems.join("\n")).toMatch(/Ligne 3 : photo introuvable \(inconnu\.jpg\)/);
+    expect(res.body.problems.join("\n")).toMatch(/Ligne 4 : valide doit être oui ou non/);
+    expect(res.body.problems.join("\n")).toMatch(/Ligne 4 : Lien invalide/);
+    const { body: set } = await admin("get", "/sets/TST-03");
+    expect(set.items.find((i) => i.original_filename === "gojo.jpg").name).toBe("Satoru Gojo");
+  });
+
+  it("CSV sans colonne photo_id ni fichier : refusé", async () => {
+    const res = await admin("post", "/sets/TST-03/items.csv").set("Content-Type", "text/csv").send("nom;rarete\nX;R\n");
+    expect(res.status).toBe(400);
+  });
+
   it("enregistre l'ordre des raretés", async () => {
     const res = await admin("put", "/sets/TST-03/rarities").send({ order: ["ssr", "R"] });
     expect(res.body).toEqual([
@@ -190,6 +242,14 @@ describe("Workflow d'import", () => {
     const { body: set } = await admin("get", "/sets/TST-03");
     const res = await admin("patch", `/items/${set.items[0].id}`).send({ product_url: "javascript:alert(1)" });
     expect(res.status).toBe(400);
+  });
+
+  it("« Tout valider » valide toutes les photos lues", async () => {
+    const res = await admin("post", "/sets/TST-03/validate-all");
+    expect(res.body.validated).toBe(2);
+    const { body: set } = await admin("get", "/sets/TST-03");
+    expect(set.items.every((i) => i.validated)).toBe(true);
+    for (const item of set.items) await admin("patch", `/items/${item.id}`).send({ validated: false });
   });
 
   it("refuse deux photos de la même carte", async () => {

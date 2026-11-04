@@ -346,10 +346,59 @@ function cardsPanel(set, items, onlyToCheck) {
       }),
   }, "Valider toutes les cartes « sûr »");
 
+  const validateAll = h("button", {
+    class: "secondary",
+    onclick: () => {
+      if (!confirm("Valider toutes les cartes lues, sans les vérifier une par une ?")) return;
+      busy(validateAll, async () => {
+        const r = await api(`/sets/${encodeURIComponent(set.code)}/validate-all`, { method: "POST" });
+        toast(`${r.validated} carte(s) validée(s)`);
+        route();
+      });
+    },
+  }, "Tout valider");
+
+  // CSV : exporter, corriger dans Excel ou Google Sheets, réimporter (les lignes importées sont validées)
+  const csvInput = h("input", { type: "file", accept: ".csv,text/csv", hidden: true });
+  const importCsv = h("button", { class: "secondary", onclick: () => csvInput.click() }, "Importer un CSV");
+  const csvProblems = h("ul", { class: "problems" });
+  csvInput.addEventListener("change", () => {
+    const file = csvInput.files[0];
+    if (!file) return;
+    busy(importCsv, async () => {
+      csvProblems.replaceChildren();
+      try {
+        const res = await fetch(`/admin/api/sets/${encodeURIComponent(set.code)}/items.csv`, {
+          method: "POST",
+          headers: { "Content-Type": "text/csv" },
+          body: await file.text(),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          csvProblems.replaceChildren(...(data.problems ?? [data.error]).slice(0, 30).map((p) => h("li", {}, p)));
+          return;
+        }
+        toast(`${data.updated} carte(s) importée(s) et validée(s)`);
+        route();
+      } finally {
+        csvInput.value = "";
+      }
+    });
+  });
+  const exportCsv = h("a", { href: `/admin/api/sets/${encodeURIComponent(set.code)}/items.csv`, class: "secondary-link" }, "Exporter en CSV");
+
   return h(
     "section",
     { class: "panel" },
     h("h2", {}, "5. Vérifier les cartes"),
+    h(
+      "p",
+      { class: "muted" },
+      "Plus rapide : « Exporter en CSV », corrige dans Excel ou Google Sheets, puis « Importer un CSV ». ",
+      "Colonnes : photo_id ou fichier (nom de la photo envoyée), nom, nom_original, rarete, numero, lien_produit, valide (oui/non, vide = oui).",
+    ),
+    h("div", { class: "row" }, exportCsv, importCsv, csvInput, validateAll),
+    csvProblems,
     h("div", { class: "row" }, h("label", { style: "flex-direction: row; align-items: center" }, filter, "Seulement celles pas encore validées"), validateHigh),
     h(
       "div",

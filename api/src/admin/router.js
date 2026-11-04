@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import multer from "multer";
+import { parse as parseCsv } from "csv-parse/sync";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
@@ -265,6 +266,139 @@ api.post("/items/:id/retry", async (req, res) => {
   if (!rows[0]) throw new HttpError(409, "Photo introuvable ou déjà en cours de lecture");
   kickQueue();
   res.json(rows[0]);
+});
+
+// ---------- Validation en lot et CSV ----------
+
+// Valide d'un coup toutes les photos lues (ou remplies à la main) qui ont nom, rareté et numéro
+api.post("/sets/:code/validate-all", async (req, res) => {
+  const set = await getSet(req.params.code);
+  const { rowCount } = await pool.query(
+    `UPDATE import_items SET validated = true, updated_at = now()
+     WHERE set_code = $1 AND NOT validated AND status IN ('done', 'error')
+       AND name IS NOT NULL AND rarity IS NOT NULL AND number IS NOT NULL`,
+    [set.code],
+  );
+  res.json({ validated: rowCount });
+});
+
+const CSV_COLUMNS = ["photo_id", "fichier", "nom", "nom_original", "rarete", "numero", "lien_produit", "valide"];
+
+function csvField(value) {
+  const text = value === null || value === undefined ? "" : String(value);
+  return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+// Export : point-virgule + BOM, pour qu'Excel (en français) l'ouvre en colonnes avec les accents
+api.get("/sets/:code/items.csv", async (req, res) => {
+  const set = await getSet(req.params.code);
+  const { rows } = await pool.query("SELECT * FROM import_items WHERE set_code = $1 ORDER BY id", [set.code]);
+  const lines = [
+    CSV_COLUMNS.join(";"),
+    ...rows.map((i) =>
+      [i.id, i.original_filename, i.name, i.name_original, i.rarity, i.number, i.product_url, i.validated ? "oui" : "non"]
+        .map(csvField)
+        .join(";"),
+    ),
+  ];
+  res.set("Content-Type", "text/csv; charset=utf-8");
+  res.set("Content-Disposition", `attachment; filename="${set.code}-cartes.csv"`);
+  res.send("\uFEFF" + lines.join("\r\n") + "\r\n");
+});
+
+const YES = new Set(["", "oui", "o", "yes", "y", "1", "true", "x", "vrai"]);
+const NO = new Set(["non", "n", "no", "0", "false", "faux"]);
+
+// Import : met à jour les photos du set à partir d'un CSV (exporté puis corrigé dans Excel/Sheets,
+// ou écrit à la main). Une ligne trouve sa photo par photo_id, sinon par fichier (nom du fichier envoyé).
+// Les lignes importées sont validées (colonne valide vide = oui). Tout ou rien : une erreur annule l'import.
+api.post("/sets/:code/items.csv", express.text({ type: () => true, limit: "2mb" }), async (req, res) => {
+  const set = await getSet(req.params.code);
+  const csvText = String(req.body ?? "").replace(/^\uFEFF/, "");
+  if (!csvText.trim()) throw new HttpError(400, "CSV vide");
+  const header = csvText.split(/\r?\n/, 1)[0];
+  const delimiter = header.includes(";") ? ";" : ",";
+
+  let records;
+  try {
+    records = parseCsv(csvText, {
+      delimiter,
+      columns: (cols) => cols.map((c) => c.trim().toLowerCase()),
+      skip_empty_lines: true,
+      trim: true,
+      relax_column_count: true,
+    });
+  } catch (err) {
+    throw new HttpError(400, `CSV illisible : ${err.message}`);
+  }
+  if (!records.length) throw new HttpError(400, "Aucune ligne dans le CSV");
+  const known = Object.keys(records[0]);
+  if (!known.includes("photo_id") && !known.includes("fichier")) {
+    throw new HttpError(400, "Le CSV doit avoir une colonne photo_id ou fichier");
+  }
+
+  const { rows: items } = await pool.query("SELECT * FROM import_items WHERE set_code = $1", [set.code]);
+  const byId = new Map(items.map((i) => [String(i.id), i]));
+  const byFile = new Map();
+  for (const i of items) {
+    const key = (i.original_filename ?? "").toLowerCase();
+    byFile.set(key, byFile.has(key) ? null : i); // null = nom de fichier en double, ambigu
+  }
+
+  const problems = [];
+  const updates = [];
+  records.forEach((r, index) => {
+    const line = index + 2;
+    const item = r.photo_id ? byId.get(r.photo_id) : byFile.get((r.fichier ?? "").toLowerCase());
+    if (!item) {
+      problems.push(`Ligne ${line} : photo introuvable (${r.photo_id || r.fichier || "vide"})`);
+      return;
+    }
+    const valide = (r.valide ?? "").toLowerCase();
+    if (!YES.has(valide) && !NO.has(valide)) problems.push(`Ligne ${line} : valide doit être oui ou non`);
+    let productUrl = item.product_url;
+    if (r.lien_produit !== undefined) {
+      try {
+        productUrl = httpUrl(r.lien_produit);
+      } catch (err) {
+        problems.push(`Ligne ${line} : ${err.message}`);
+      }
+    }
+    const pick = (col, field, normalize = text) => (r[col] === undefined ? item[field] : normalize(r[col]));
+    updates.push([
+      item.id,
+      pick("nom", "name"),
+      pick("nom_original", "name_original"),
+      pick("rarete", "rarity", normalizeRarity),
+      pick("numero", "number", normalizeNumber),
+      productUrl,
+      !NO.has(valide),
+    ]);
+  });
+  if (problems.length) return res.status(400).json({ error: "Import annulé", problems });
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const values of updates) {
+      // status done : une photo en attente ou en cours de lecture n'est plus modifiée par Claude (le CSV a priorité)
+      await client.query(
+        `UPDATE import_items SET name = $2, name_original = $3, rarity = $4, number = $5,
+           product_url = $6, validated = $7,
+           status = 'done',
+           error = NULL, updated_at = now()
+         WHERE id = $1`,
+        values,
+      );
+    }
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+  res.json({ updated: updates.length });
 });
 
 // ---------- Produits Eyesight ----------
