@@ -21,8 +21,10 @@ if [ "$PREFIX" = "aikaho_jjk" ] && [ -n "$(find ../images -mindepth 1 -maxdepth 
   mv "$IMAGES_FILE.tmp" "$IMAGES_FILE"
 fi
 
-# Supprime tout sauf les 7 plus récents
-ls -1t "$BACKUP_DIR"/"${PREFIX}"_*.sql.gz | tail -n +8 | xargs -r rm --
-ls -1t "$BACKUP_DIR"/images_*.tar.gz 2>/dev/null | tail -n +8 | xargs -r rm --
+# Supprime tout sauf les 7 plus récents.
+# « || true » : sans fichier images_*.tar.gz, ls échoue, et avec pipefail le script
+# s'arrêtait ici sans message (ce qui bloquait aussi deploy.sh).
+ls -1t "$BACKUP_DIR"/"${PREFIX}"_*.sql.gz 2>/dev/null | tail -n +8 | xargs -r rm -- || true
+ls -1t "$BACKUP_DIR"/images_*.tar.gz 2>/dev/null | tail -n +8 | xargs -r rm -- || true
 
 echo "$(date '+%F %T') Backup OK : $FILE ($(du -h "$FILE" | cut -f1))"

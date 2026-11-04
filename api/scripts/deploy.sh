@@ -10,6 +10,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."                    # racine du repo
 log() { echo "$(date '+%F %T') $*"; }
+# Une commande qui plante ne passe plus inaperçue : la ligne fautive est écrite dans le log
+trap 'log "ÉCHEC : commande en erreur à la ligne $LINENO de deploy.sh (code $?)"' ERR
 STATE=.deployed-sha
 
 # Un seul déploiement à la fois (un build peut durer plus de 5 minutes sur le Pi)
