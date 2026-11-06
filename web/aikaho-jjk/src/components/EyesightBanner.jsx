@@ -1,5 +1,6 @@
 import { EYESIGHT_URL } from "../config.js";
 import { useT } from "../i18n.js";
+import EyesightLogo from "./EyesightLogo.jsx";
 
 // Seuls les liens https vers la boutique Eyesight sont acceptés : un lien mal tapé dans /admin
 // (ou autre chose qu'Eyesight) ne doit ni faire planter la page, ni envoyer ailleurs.
@@ -31,9 +32,12 @@ function EyesightBanner({ url, content, campaign = "guide", text }) {
 
   return (
     <div className="eyesight-banner">
-      <p>{text ?? t.partnerShop}</p>
+      <div className="eyesight-banner-brand">
+        <EyesightLogo content={content} />
+        <p>{text ?? t.partnerShop}</p>
+      </div>
       {/* nouvel onglet : le visiteur ne perd pas le guide */}
-      <a href={link.toString()} target="_blank" rel="noopener">
+      <a className="eyesight-cta" href={link.toString()} target="_blank" rel="noopener">
         {t.shop}
       </a>
     </div>

@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { SITE_NAME } from "../config.js";
 import LanguageToggle from "./LanguageToggle.jsx";
+import EyesightLogo from "./EyesightLogo.jsx";
 
 // Barre du haut, sur toutes les pages : le logo ramène à l'accueil
 function SiteHeader() {
@@ -12,7 +13,10 @@ function SiteHeader() {
           Foreign Card <strong>TCG</strong>
         </span>
       </Link>
-      <LanguageToggle />
+      <div className="site-header-right">
+        <EyesightLogo content="header" small />
+        <LanguageToggle />
+      </div>
     </div>
   );
 }
