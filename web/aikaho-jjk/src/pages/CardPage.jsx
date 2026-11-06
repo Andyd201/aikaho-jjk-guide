@@ -5,8 +5,10 @@ import { SITE_NAME, setFallbackDescription, setFallbackTitle } from "../config.j
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import JsonLd from "../components/JsonLd.jsx";
 import Seo from "../components/Seo.jsx";
+import { useT } from "../i18n.js";
 
 function CardPage() {
+  const { t } = useT();
   const { code, id } = useParams();
   const key = `${code}/${id}`;
   // On garde la clé avec le résultat : si elle ne correspond pas à l'URL, c'est que ça charge
@@ -27,7 +29,7 @@ function CardPage() {
   const loading = result.key !== key;
   const { card, set, error } = result;
 
-  const back = <Link to={`/sets/${code}`} className="back-link">← Retour au set</Link>;
+  const back = <Link to={`/sets/${code}`} className="back-link">{t.backToSet}</Link>;
   const path = `/sets/${code}/cards/${id}`;
 
   // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
@@ -35,10 +37,10 @@ function CardPage() {
     <Seo title={setFallbackTitle(code)} description={setFallbackDescription(code)} path={path} />
   );
 
-  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
+  if (loading) return <main>{fallbackSeo}<p className="status">{t.loading}</p></main>;
   // Pas de noindex sur une erreur : si le Pi est en panne pendant que Google passe,
   // la page ne doit pas sortir de l'index
-  if (error) return <main>{fallbackSeo}{back}<p className="status">Impossible de charger la carte.</p></main>;
+  if (error) return <main>{fallbackSeo}{back}<p className="status">{t.cardError}</p></main>;
 
   // La carte existe mais dans un autre set (URL mal tapée ou carte déplacée) : on corrige l'URL
   if (card && card.set_code !== code) {
@@ -51,7 +53,7 @@ function CardPage() {
         <title>{`Card not found – ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex" />
         {back}
-        <p className="status">Carte introuvable.</p>
+        <p className="status">{t.cardNotFound}</p>
       </main>
     );
   }
@@ -96,7 +98,7 @@ function CardPage() {
         </div>
         <div className="card-info">
           <p className="eyebrow">
-            {set.name} · n° {card.number}
+            {set.name} · {t.cardNumber(card.number)}
           </p>
           <h1>{card.name}</h1>
           <span className="rarity">{card.rarity}</span>
@@ -105,9 +107,7 @@ function CardPage() {
             content={card.id}
             campaign={card.set_code}
             text={
-              ownProduct
-                ? "Procure-toi cette carte chez Eyesight"
-                : `Procure-toi tes boîtes ${set.name} chez Eyesight`
+              ownProduct ? t.cardBanner : t.setBanner(set.name)
             }
           />
         </div>

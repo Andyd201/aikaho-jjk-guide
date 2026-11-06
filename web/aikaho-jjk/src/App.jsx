@@ -6,9 +6,11 @@ import SetPage from "./pages/SetPage.jsx";
 import CardPage from "./pages/CardPage.jsx";
 import LegacyCardRedirect from "./pages/LegacyCardRedirect.jsx";
 import { SITE_NAME } from "./config.js";
+import { useT } from "./i18n.js";
 import "./App.css";
 
 function App() {
+  const { t } = useT();
   return (
     <>
       <SiteHeader />
@@ -26,7 +28,7 @@ function App() {
           <>
             <title>{`Page not found – ${SITE_NAME}`}</title>
             <meta name="robots" content="noindex" />
-            <p>Page introuvable.</p>
+            <p>{t.pageNotFound}</p>
           </>
         }
       />
