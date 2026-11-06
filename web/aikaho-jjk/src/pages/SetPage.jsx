@@ -14,9 +14,11 @@ import JsonLd from "../components/JsonLd.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 import RarityFilter from "../components/RarityFilter.jsx";
 import Seo from "../components/Seo.jsx";
+import { useT } from "../i18n.js";
 import SetAbout from "../components/SetAbout.jsx";
 
 function SetPage() {
+  const { t } = useT();
   const { code } = useParams();
   // On garde le code avec le résultat : s'il ne correspond pas à l'URL, c'est que ça charge
   const [result, setResult] = useState({ code: null, set: null, cards: [], error: null });
@@ -97,7 +99,7 @@ function SetPage() {
   const back = set ? (
     <Link to={`/games/${set.game_code}`} className="back-link">← {set.game_name}</Link>
   ) : (
-    <Link to="/" className="back-link">← Tous les jeux</Link>
+    <Link to="/" className="back-link">{t.allGames}</Link>
   );
 
   // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
@@ -109,23 +111,23 @@ function SetPage() {
     />
   );
 
-  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
+  if (loading) return <main>{fallbackSeo}<p className="status">{t.loading}</p></main>;
   // Pas de noindex sur une erreur : si le Pi est en panne pendant que Google passe,
   // la page ne doit pas sortir de l'index
-  if (error) return <main>{fallbackSeo}{back}<p className="status">Impossible de charger le set.</p></main>;
+  if (error) return <main>{fallbackSeo}{back}<p className="status">{t.setError}</p></main>;
   if (!set) {
     return (
       <main>
         <title>{`Set not found – ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex" />
         {back}
-        <p className="status">Set introuvable.</p>
+        <p className="status">{t.setNotFound}</p>
       </main>
     );
   }
   // Liste vide : sinon le titre dirait « All 0 Cards » et SetAbout n'aurait aucune rareté
   if (cards.length === 0) {
-    return <main>{fallbackSeo}{back}<p className="status">Aucune carte pour l'instant.</p></main>;
+    return <main>{fallbackSeo}{back}<p className="status">{t.noCards}</p></main>;
   }
 
   // Toujours sur toutes les cartes, pas sur les cartes filtrées
@@ -165,7 +167,7 @@ function SetPage() {
           url={set.product_url}
           content={set.code}
           campaign={set.code}
-          text={`Procure-toi tes boîtes ${set.name} chez Eyesight`}
+          text={t.setBanner(set.name)}
         />
       </header>
       <div className="filters">
@@ -177,13 +179,13 @@ function SetPage() {
         />
       </div>
       <p className="count">
-        {filteredCards.length} {filteredCards.length > 1 ? "cartes" : "carte"}
+        {t.cards(filteredCards.length)}
       </p>
       {filteredCards.length === 0 ? (
         <div className="no-results">
-          <p>Aucune carte ne correspond.</p>
+          <p>{t.noMatch}</p>
           <button type="button" onClick={clearFilters}>
-            Effacer les filtres
+            {t.clearFilters}
           </button>
         </div>
       ) : (

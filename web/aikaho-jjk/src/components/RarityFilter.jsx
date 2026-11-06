@@ -1,6 +1,9 @@
+import { useT } from "../i18n.js";
+
 function RarityFilter({ rarities, selected, onToggle }) {
+  const { t } = useT();
   return (
-    <div className="rarity-filter" role="group" aria-label="Filtrer par rareté">
+    <div className="rarity-filter" role="group" aria-label={t.rarityFilterLabel}>
       {rarities.map((rarity) => (
         <button
           key={rarity}

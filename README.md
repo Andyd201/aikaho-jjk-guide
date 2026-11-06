@@ -145,6 +145,10 @@ Voir [web/aikaho-jjk/.env.example](web/aikaho-jjk/.env.example).
 | `/sets/:code` | Grille d'un set, recherche et filtres dans l'URL (`?q=goj&rarity=ACE,CHR`) |
 | `/sets/:code/cards/:id` | Fiche d'une carte (si la carte est dans un autre set, redirection vers la bonne URL) |
 
+**Langue** : l'interface est en **anglais par défaut** et passe toute seule en **français** si le navigateur
+du visiteur est en français. Boutons FR / EN dans la barre du haut (choix retenu dans le navigateur).
+Les textes sont dans `web/aikaho-jjk/src/i18n.js`. Les titres et descriptions pour Google restent en anglais.
+
 Anciennes URL (d'avant le multi-set, déjà partagées) : `/cards/:id` redirige vers `/sets/<set de la carte>/cards/:id`, et `/?q=…&rarity=…` redirige vers `/sets/JJK-01` avec les mêmes filtres (`LEGACY_SET_CODE` dans [config.js](web/aikaho-jjk/src/config.js)).
 
 La bannière Eyesight pointe vers le produit de la carte, sinon celui du set (`product_url`), sinon vers `EYESIGHT_URL`.

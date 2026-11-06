@@ -5,6 +5,7 @@ import { fetchSets } from "../api.js";
 import { HOME_DESCRIPTION, HOME_TITLE, LEGACY_SET_CODE } from "../config.js";
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import Seo from "../components/Seo.jsx";
+import { useT } from "../i18n.js";
 
 // Les anciens liens filtrés pointaient sur la racine (/?q=goj&rarity=ACE) : on garde les filtres
 const LEGACY_PARAMS = ["q", "rarity"];
@@ -19,6 +20,7 @@ function HomePage() {
 }
 
 function SetList() {
+  const { t } = useT();
   const [sets, setSets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,28 +53,28 @@ function SetList() {
 
   const hero = (
     <header className="hero">
-      <p className="eyebrow">Base de cartes</p>
+      <p className="eyebrow">{t.homeEyebrow}</p>
       <h1>
-        Cartes TCG asiatiques <span>Japon · Corée · Chine</span>
+        {t.homeTitle} <span>{t.homeSubtitle}</span>
       </h1>
       <p className="hero-lead">
-        Toutes les cartes des sets japonais, coréens et chinois : images, numéros et raretés, set par set.
+        {t.homeLead}
       </p>
-      <EyesightBanner content="home" text="Boutique partenaire : Eyesight Collectibles" />
+      <EyesightBanner content="home" text={t.partnerShop} />
     </header>
   );
 
   let content;
-  if (loading) content = <p className="status">Chargement…</p>;
-  else if (error) content = <p className="status">Impossible de charger les sets.</p>;
-  else if (sets.length === 0) content = <p className="status">Aucun set pour l'instant.</p>;
+  if (loading) content = <p className="status">{t.loading}</p>;
+  else if (error) content = <p className="status">{t.setsError}</p>;
+  else if (sets.length === 0) content = <p className="status">{t.noSets}</p>;
   else {
     content = games.map((game) => (
       <section key={game.code} className="game" aria-labelledby={`game-${game.code}`}>
         <h2 id={`game-${game.code}`} className="game-title">
           <Link to={`/games/${game.code}`}>{game.name}</Link>
           <span>
-            {game.sets.length} {game.sets.length > 1 ? "sets" : "set"}
+            {t.sets(game.sets.length)}
           </span>
         </h2>
         <ul className="set-list">

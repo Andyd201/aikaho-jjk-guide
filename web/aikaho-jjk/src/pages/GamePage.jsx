@@ -4,10 +4,12 @@ import { fetchSets } from "../api.js";
 import { SITE_NAME, gameFallbackTitle, gameKanji } from "../config.js";
 import EyesightBanner from "../components/EyesightBanner.jsx";
 import Seo from "../components/Seo.jsx";
+import { useT } from "../i18n.js";
 import SetTicker from "../components/SetTicker.jsx";
 
 // Un jeu (ex. Demon Slayer) et tous ses sets publiés
 function GamePage() {
+  const { t } = useT();
   const { code } = useParams();
   // On garde le code avec le résultat : s'il ne correspond pas à l'URL, c'est que ça charge
   const [result, setResult] = useState({ code: null, sets: [], error: null });
@@ -25,13 +27,13 @@ function GamePage() {
   const loading = result.code !== code;
   const { sets, error } = result;
   const path = `/games/${code}`;
-  const back = <Link to="/" className="back-link">← Tous les jeux</Link>;
+  const back = <Link to="/" className="back-link">{t.allGames}</Link>;
   const fallbackSeo = (
     <Seo title={gameFallbackTitle(code)} description={`Card lists for every ${code} set.`} path={path} />
   );
 
-  if (loading) return <main>{fallbackSeo}<p className="status">Chargement…</p></main>;
-  if (error) return <main>{fallbackSeo}{back}<p className="status">Impossible de charger le jeu.</p></main>;
+  if (loading) return <main>{fallbackSeo}<p className="status">{t.loading}</p></main>;
+  if (error) return <main>{fallbackSeo}{back}<p className="status">{t.gameError}</p></main>;
   // Aucun set publié : jeu inconnu (ou seulement des sets en brouillon)
   if (sets.length === 0) {
     return (
@@ -39,7 +41,7 @@ function GamePage() {
         <title>{`Game not found – ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex" />
         {back}
-        <p className="status">Jeu introuvable.</p>
+        <p className="status">{t.gameNotFound}</p>
       </main>
     );
   }
@@ -61,11 +63,11 @@ function GamePage() {
       <header className="hero hero-set">
         {kanji && <span className="hero-kanji" aria-hidden="true">{kanji}</span>}
         {back}
-        <p className="eyebrow">Jeu</p>
+        <p className="eyebrow">{t.gameEyebrow}</p>
         <h1>
-          {gameName} <span>{sets.length} {sets.length > 1 ? "sets" : "set"} · {cardCount} cartes</span>
+          {gameName} <span>{t.sets(sets.length)} · {t.cards(cardCount)}</span>
         </h1>
-        <EyesightBanner content={code} campaign={code} text={`Procure-toi du ${gameName} chez Eyesight`} />
+        <EyesightBanner content={code} campaign={code} text={t.gameBanner(gameName)} />
       </header>
       <ul className="set-list">
         {sets.map((set) => (
