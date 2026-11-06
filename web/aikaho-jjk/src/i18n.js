@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 
 // Traduction de l'interface. La langue est choisie toute seule :
 // 1. le choix du visiteur (bouton FR/EN), gardé dans son navigateur ;
-// 2. sinon la langue de son navigateur : français → fr, tout le reste → en.
+// 2. sinon la langue principale de son navigateur : français → fr, tout le reste → en.
 // Les titres et descriptions pour Google restent en anglais (les recherches se font en anglais).
 export const LANGS = ["fr", "en"];
 
@@ -108,8 +108,10 @@ export function detectLang() {
   } catch {
     /* navigation privée : on se fie au navigateur */
   }
-  const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
-  return preferred.some((l) => l?.toLowerCase().startsWith("fr")) ? "fr" : "en";
+  // Seulement la langue principale du navigateur : un anglophone qui a aussi le français
+  // en 2e ou 3e choix (ex. en-US, en-CA, fr-CA) reste en anglais
+  const main = navigator.languages?.[0] ?? navigator.language ?? "en";
+  return main.toLowerCase().startsWith("fr") ? "fr" : "en";
 }
 
 export function saveLang(lang) {
