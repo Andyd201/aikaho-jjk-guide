@@ -661,6 +661,21 @@ main {
   text-transform: uppercase;
   color: #fff;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eyesight-logo-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.eyesight-logo-small .eyesight-logo-badge {
+  width: 28px;
+  height: 28px;
 }
 
 .eyesight-logo:hover {
