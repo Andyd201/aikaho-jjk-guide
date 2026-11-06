@@ -186,6 +186,8 @@ api.post("/sets/:code/photos", upload.array("photos", 20), async (req, res) => {
 
   const dir = join(IMAGES_DIR, set.code);
   await mkdir(dir, { recursive: true });
+  // Lecture par Claude seulement si cochée (champ ai=1) : sinon les infos viennent d'un CSV ou à la main
+  const useAi = req.body?.ai === "1";
 
   const created = [];
   const failed = [];
@@ -203,8 +205,8 @@ api.post("/sets/:code/photos", upload.array("photos", 20), async (req, res) => {
       await writeFile(join(dir, imageFile), webp);
       await writeFile(join(dir, `${id}.hd.webp`), hd);
       const { rows } = await pool.query(
-        `INSERT INTO import_items (set_code, image_file, original_filename) VALUES ($1, $2, $3) RETURNING *`,
-        [set.code, imageFile, file.originalname.slice(0, 200)],
+        `INSERT INTO import_items (set_code, image_file, original_filename, status) VALUES ($1, $2, $3, $4) RETURNING *`,
+        [set.code, imageFile, file.originalname.slice(0, 200), useAi ? "pending" : "done"],
       );
       created.push(rows[0]);
     } catch (err) {
@@ -212,8 +214,21 @@ api.post("/sets/:code/photos", upload.array("photos", 20), async (req, res) => {
     }
   }
 
-  kickQueue();
+  if (useAi) kickQueue();
   res.status(201).json({ created, failed });
+});
+
+// Lire avec Claude seulement les photos qui n'ont pas encore leurs infos (ex. après un CSV incomplet)
+api.post("/sets/:code/read-missing", async (req, res) => {
+  const set = await getSet(req.params.code);
+  const { rowCount } = await pool.query(
+    `UPDATE import_items SET status = 'pending', error = NULL, updated_at = now()
+     WHERE set_code = $1 AND NOT validated AND status IN ('done', 'error')
+       AND (name IS NULL OR rarity IS NULL OR number IS NULL)`,
+    [set.code],
+  );
+  if (rowCount) kickQueue();
+  res.json({ queued: rowCount });
 });
 
 api.patch("/items/:id", async (req, res) => {
