@@ -1,6 +1,6 @@
 import { EYESIGHT_URL } from "../config.js";
 
-// Logo texte d'Eyesight Collectibles, comme sur eyesightcollectibles.com (Poppins gras, majuscules).
+// Logo d'Eyesight Collectibles (badge rond + nom), comme sur eyesightcollectibles.com (Poppins gras, majuscules).
 // Mène toujours à l'accueil de la boutique ; content : d'où vient le clic (utm_content)
 function EyesightLogo({ content = "logo", small = false }) {
   const link = new URL(EYESIGHT_URL);
@@ -16,9 +16,12 @@ function EyesightLogo({ content = "logo", small = false }) {
       rel="noopener"
       aria-label="Eyesight Collectibles"
     >
-      Eyesight
-      <br />
-      Collectibles
+      <img src="/eyesight-logo.webp" alt="" width="150" height="150" className="eyesight-logo-badge" />
+      <span>
+        Eyesight
+        <br />
+        Collectibles
+      </span>
     </a>
   );
 }
