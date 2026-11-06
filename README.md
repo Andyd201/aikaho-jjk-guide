@@ -1,6 +1,11 @@
-# Aikaho JJK Card Guide
+# Foreign Card TCG
 
-Guide de cartes (style Collectr) pour le TCG **Jujutsu Kaisen d'Aikaho**, set **JJK-01** (151 cartes) : grille du set, fiche par carte, recherche et filtre par rareté.
+**https://foreigncardtcg.com** : le hub des cartes à collectionner **asiatiques** (sets japonais, coréens et chinois).
+Pour chaque jeu et chaque set : la grille des cartes, une fiche par carte, recherche et filtre par rareté,
+et un lien vers le produit chez **Eyesight Collectibles**, boutique partenaire.
+
+Premiers sets : **JJK-01** (Aikaho Jujutsu Kaisen, 151 cartes) et **DS-07** (Demon Slayer). Les sets s'ajoutent
+par photos dans `/admin` (voir « Import d'un set »).
 
 ## Stack
 
@@ -129,13 +134,14 @@ Voir [web/aikaho-jjk/.env.example](web/aikaho-jjk/.env.example).
 - JSON-LD : `ItemList` sur chaque set, `Product` (sans prix, marque = le jeu) sur chaque fiche
 - Bloc « About the set » sous la grille, calculé à partir des raretés du set renvoyées par l'API ([SetAbout.jsx](web/aikaho-jjk/src/components/SetAbout.jsx))
 - Balises par défaut dans `index.html` (`data-fallback`, celles de l'accueil) pour les robots qui n'exécutent pas le JavaScript
-- `sitemap.xml` et `robots.txt` générés par [scripts/generate-seo-files.js](web/aikaho-jjk/scripts/generate-seo-files.js) à partir de l'API (`VITE_API_URL`) : `/`, chaque `/sets/:code` et chaque `/sets/:code/cards/:id` des sets publiés. Si l'API ne répond pas (15 s), le build **ne plante pas** : un avertissement s'affiche et le sitemap est fait à partir de `data/cards.csv` (JJK-01 seulement). Lancé tout seul avant `npm run build` (`prebuild`). Les fichiers ne sont pas commités.
+- `sitemap.xml` et `robots.txt` générés par [scripts/generate-seo-files.js](web/aikaho-jjk/scripts/generate-seo-files.js) à partir de l'API (`VITE_API_URL`) : `/`, chaque `/games/:code`, chaque `/sets/:code` et chaque `/sets/:code/cards/:id` des sets publiés. Si l'API ne répond pas (15 s), le build **ne plante pas** : un avertissement s'affiche et le sitemap est fait à partir de `data/cards.csv` (JJK-01 seulement). Lancé tout seul avant `npm run build` (`prebuild`). Les fichiers ne sont pas commités.
 
 ### Pages du front
 
 | URL | Page |
 |---|---|
 | `/` | Accueil : les sets publiés, regroupés par jeu |
+| `/games/:code` | Un jeu et tous ses sets publiés |
 | `/sets/:code` | Grille d'un set, recherche et filtres dans l'URL (`?q=goj&rarity=ACE,CHR`) |
 | `/sets/:code/cards/:id` | Fiche d'une carte (si la carte est dans un autre set, redirection vers la bonne URL) |
 

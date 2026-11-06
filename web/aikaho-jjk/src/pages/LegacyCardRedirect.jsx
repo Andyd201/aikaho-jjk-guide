@@ -21,7 +21,7 @@ function LegacyCardRedirect() {
 
   const loading = result.id !== id;
   const { card, error } = result;
-  const back = <Link to="/" className="back-link">← Tous les sets</Link>;
+  const back = <Link to="/" className="back-link">← Tous les jeux</Link>;
 
   // Pas de canonical ici : la vraie page est celle vers laquelle on redirige
   const fallbackHead = (

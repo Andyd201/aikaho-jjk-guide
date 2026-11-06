@@ -1,5 +1,7 @@
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/HomePage.jsx";
+import GamePage from "./pages/GamePage.jsx";
+import SiteHeader from "./components/SiteHeader.jsx";
 import SetPage from "./pages/SetPage.jsx";
 import CardPage from "./pages/CardPage.jsx";
 import LegacyCardRedirect from "./pages/LegacyCardRedirect.jsx";
@@ -8,9 +10,12 @@ import "./App.css";
 
 function App() {
   return (
-    <Routes>
+    <>
+      <SiteHeader />
+      <Routes>
       {/* / redirige aussi les anciens liens filtrés (/?rarity=ACE) vers JJK-01 */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/games/:code" element={<GamePage />} />
       <Route path="/sets/:code" element={<SetPage />} />
       <Route path="/sets/:code/cards/:id" element={<CardPage />} />
       {/* Ancienne URL d'une fiche, d'avant le multi-set */}
@@ -25,7 +30,8 @@ function App() {
           </>
         }
       />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

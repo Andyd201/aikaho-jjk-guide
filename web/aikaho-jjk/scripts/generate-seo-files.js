@@ -15,6 +15,7 @@ const siteUrl = VITE_SITE_URL.replace(/\/$/, "");
 
 // Seul set du CSV : sert de secours si l'API est injoignable
 const FALLBACK_SET_CODE = "JJK-01";
+const FALLBACK_GAME_CODE = "AIKAHO-JJK";
 const TIMEOUT_MS = 15_000;
 
 async function getJson(path) {
@@ -25,7 +26,7 @@ async function getJson(path) {
   return res.json();
 }
 
-// [{ code, ids: [...] }] pour chaque set publié
+// [{ code, game, ids: [...] }] pour chaque set publié
 async function setsFromApi() {
   if (!VITE_API_URL) throw new Error("VITE_API_URL manquante");
   const sets = await getJson("/sets");
@@ -33,7 +34,7 @@ async function setsFromApi() {
   const results = await Promise.allSettled(
     sets.map(async (set) => {
       const cards = await getJson(`/sets/${encodeURIComponent(set.code)}/cards`);
-      return { code: set.code, ids: cards.map((card) => card.id) };
+      return { code: set.code, game: set.game_code, ids: cards.map((card) => card.id) };
     }),
   );
   const ok = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
@@ -53,7 +54,7 @@ function setsFromCsv() {
     .slice(1)
     .filter((line) => line.trim())
     .map((line) => line.split(",")[0]);
-  return [{ code: FALLBACK_SET_CODE, ids }];
+  return [{ code: FALLBACK_SET_CODE, game: FALLBACK_GAME_CODE, ids }];
 }
 
 let sets;
@@ -66,6 +67,10 @@ try {
 }
 
 const urls = ["/"];
+// Une page par jeu (/games/:code), puis chaque set et ses cartes
+for (const game of new Set(sets.map((set) => set.game))) {
+  urls.push(`/games/${encodeURIComponent(game)}`);
+}
 for (const set of sets) {
   const setPath = `/sets/${encodeURIComponent(set.code)}`;
   urls.push(setPath, ...set.ids.map((id) => `${setPath}/cards/${encodeURIComponent(id)}`));
