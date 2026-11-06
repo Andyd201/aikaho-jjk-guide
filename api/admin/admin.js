@@ -60,6 +60,8 @@ async function busy(button, action) {
 }
 
 const STATUS_LABEL = { pending: "en attente", processing: "lecture…", done: "lue", error: "erreur" };
+// Photo envoyée sans Claude et pas encore remplie (CSV ou à la main)
+const isEmpty = (item) => item.status === "done" && !item.confidence && !item.name;
 const CONFIDENCE_LABEL = { high: "sûr", medium: "à vérifier", low: "douteux" };
 
 // ---------- Liste des sets ----------
@@ -220,9 +222,39 @@ function infoPanel(set) {
   return h("section", { class: "panel" }, h("h2", {}, "1. Infos du set"), form);
 }
 
+// Choix « lire avec Claude » retenu d'une visite à l'autre (seulement dans ce navigateur)
+function readAiChoice() {
+  try {
+    return localStorage.getItem("useAi") === "1";
+  } catch {
+    return false;
+  }
+}
+function saveAiChoice(value) {
+  try {
+    localStorage.setItem("useAi", value ? "1" : "0");
+  } catch {
+    /* navigation privée : pas grave */
+  }
+}
+
 function uploadPanel(set, counts) {
   const input = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
   const status = h("p", { class: "muted" });
+  const aiBox = h("input", { type: "checkbox", checked: readAiChoice(), onchange: (e) => saveAiChoice(e.target.checked) });
+  const missing = set.items.filter((i) => !i.validated && !["pending", "processing"].includes(i.status) && (!i.name || !i.rarity || !i.number)).length;
+  const readMissing = h("button", {
+    class: "secondary",
+    disabled: missing === 0,
+    onclick: () => {
+      if (!confirm(`Envoyer ${missing} photo(s) à Claude ? (payant, quelques sous par carte)`)) return;
+      busy(readMissing, async () => {
+        const r = await api(`/sets/${encodeURIComponent(set.code)}/read-missing`, { method: "POST" });
+        toast(`${r.queued} photo(s) envoyée(s) à Claude`);
+        route();
+      });
+    },
+  }, `Lire avec Claude les ${missing} photo(s) sans infos`);
 
   async function send(files) {
     const images = [...files].filter((f) => f.type.startsWith("image/"));
@@ -232,6 +264,7 @@ function uploadPanel(set, counts) {
       status.textContent = `Envoi ${Math.min(i + 10, images.length)} / ${images.length}…`;
       const body = new FormData();
       for (const file of images.slice(i, i + 10)) body.append("photos", file);
+      if (aiBox.checked) body.append("ai", "1");
       try {
         const result = await api(`/sets/${encodeURIComponent(set.code)}/photos`, { method: "POST", body });
         if (result.failed.length) toast(`${result.failed.length} photo(s) refusée(s) : ${result.failed[0].error}`);
@@ -270,7 +303,22 @@ function uploadPanel(set, counts) {
       ? `${counts.error} photo(s) en erreur : utilise « Relancer » dans le tableau.`
       : "";
 
-  return h("section", { class: "panel" }, h("h2", {}, "2. Photos"), drop, input, status);
+  return h(
+    "section",
+    { class: "panel" },
+    h("h2", {}, "2. Photos"),
+    h(
+      "p",
+      { class: "muted" },
+      "Sans Claude (gratuit) : envoie les photos, puis importe un CSV à l'étape 5 (colonne « fichier » = nom de la photo). ",
+      "Avec Claude (payant) : coche la case, chaque photo est lue automatiquement.",
+    ),
+    h("label", { style: "flex-direction: row; align-items: center; margin-bottom: 10px" }, aiBox, "Lire les cartes avec Claude (payant)"),
+    drop,
+    input,
+    status,
+    h("div", { class: "row", style: "margin-top: 10px" }, readMissing),
+  );
 }
 
 function raritiesPanel(set) {
@@ -459,7 +507,9 @@ function itemRow(set, item) {
     h(
       "td",
       {},
-      h("span", { class: `badge ${item.status}` }, STATUS_LABEL[item.status]),
+      isEmpty(item)
+        ? h("span", { class: "badge pending" }, "à remplir")
+        : h("span", { class: `badge ${item.status}` }, STATUS_LABEL[item.status]),
       " ",
       item.confidence && h("span", { class: `badge ${item.confidence}`, title: item.notes ?? "" }, CONFIDENCE_LABEL[item.confidence]),
       item.printed_code && h("div", { class: "muted" }, `Imprimé : ${item.printed_code}`),
@@ -471,7 +521,7 @@ function itemRow(set, item) {
     h(
       "td",
       {},
-      h("button", { class: "secondary", disabled: reading, onclick: (e) => busy(e.target, async () => { await api(`/items/${item.id}/retry`, { method: "POST" }); route(); }) }, "Relancer"),
+      h("button", { class: "secondary", disabled: reading, onclick: (e) => busy(e.target, async () => { await api(`/items/${item.id}/retry`, { method: "POST" }); route(); }) }, isEmpty(item) ? "Lire avec Claude" : "Relancer"),
       " ",
       h("button", {
         class: "danger",

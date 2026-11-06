@@ -171,8 +171,12 @@ Si le domaine change, il faut ajouter une nouvelle propriété dans Search Conso
 Pour ajouter un set au guide, plus besoin de CSV : tout se fait sur `https://api-jjk.andydouangpanya.com/admin/`.
 
 1. **Nouveau set** : jeu, code (ex. `JJK-02`), nom, page Eyesight du set (booster box ou catégorie).
-2. **Photos** : glisse les photos (une carte par photo). L'API les convertit en WebP 800 px (`images/<SET>/`),
-   puis **Claude Vision** lit chaque carte : nom, nom imprimé, rareté, numéro, et un niveau de confiance.
+2. **Photos** : glisse les photos (une carte par photo). L'API les convertit en WebP 800 px (`images/<SET>/`).
+   - **Sans Claude (gratuit, par défaut)** : les photos sont « à remplir ». Importe ensuite un CSV à l'étape 5,
+     avec la colonne `fichier` = nom de chaque photo envoyée.
+   - **Avec Claude (payant)** : coche « Lire les cartes avec Claude » avant d'envoyer. **Claude Vision** lit chaque
+     carte : nom, nom imprimé, rareté, numéro, et un niveau de confiance.
+   - **« Lire avec Claude les photos sans infos »** : seulement celles que le CSV n'a pas remplies.
 3. **Ordre des raretés** : « Proposer à partir des photos » classe les raretés de la moins nombreuse à la plus
    nombreuse. Vérifie l'ordre, puis enregistre.
 4. **Produits Eyesight** : chaque code (ex. `SSR-012`) est cherché dans WooCommerce. Un seul produit trouvé = choisi

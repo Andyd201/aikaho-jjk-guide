@@ -117,7 +117,7 @@ describe("Workflow d'import", () => {
   });
 
   it("convertit les photos en WebP et Claude les lit", async () => {
-    const res = await admin("post", "/sets/TST-03/photos")
+    const res = await admin("post", "/sets/TST-03/photos").field("ai", "1")
       .attach("photos", await png("gojo.jpg"), "gojo.jpg")
       .attach("photos", await png("yuji.jpg"), "yuji.jpg")
       .attach("photos", await png("flou.jpg"), "flou.jpg");
@@ -136,6 +136,37 @@ describe("Workflow d'import", () => {
     expect(byFile["gojo.jpg"]).toMatchObject({ status: "done", name: "Satoru Gojo", rarity: "SSR", number: "012", confidence: "high" });
     expect(byFile["yuji.jpg"]).toMatchObject({ status: "done", rarity: "R", number: "001", notes: "Reflet" });
     expect(byFile["flou.jpg"]).toMatchObject({ status: "error", error: "Photo illisible" });
+  });
+
+  it("sans la case Claude : photos « à remplir », Claude n'est pas appelé", async () => {
+    let calls = 0;
+    setServices({ readCard: async (...args) => (calls++, fakeReadCard(...args)) });
+    await admin("post", "/sets").send({ code: "CSV-01", name: "Set CSV", game_code: "TEST-GAME" });
+    const res = await admin("post", "/sets/CSV-01/photos").attach("photos", await png("gojo.jpg"), "gojo.jpg");
+    await kickQueue();
+    expect(res.body.created[0].status).toBe("done");
+    expect(calls).toBe(0);
+
+    // Le CSV remplit la photo par son nom de fichier
+    const csv = "fichier;nom;rarete;numero\ngojo.jpg;Satoru Gojo;SSR;12\n";
+    expect((await admin("post", "/sets/CSV-01/items.csv").set("Content-Type", "text/csv").send(csv)).status).toBe(200);
+    const { body: set } = await admin("get", "/sets/CSV-01");
+    expect(set.items[0]).toMatchObject({ name: "Satoru Gojo", rarity: "SSR", number: "012", validated: true });
+    expect(calls).toBe(0);
+  });
+
+  it("« Lire avec Claude les photos sans infos » n'envoie que celles qui sont vides", async () => {
+    let calls = 0;
+    setServices({ readCard: async () => (calls++, { name: "Lu", rarity: "R", number: "1", confidence: "high" }) });
+    await admin("post", "/sets/CSV-01/photos").attach("photos", await png("yuji.jpg"), "yuji.jpg");
+    const res = await admin("post", "/sets/CSV-01/read-missing");
+    expect(res.body.queued).toBe(1);
+    await kickQueue();
+    expect(calls).toBe(1);
+    const { body: set } = await admin("get", "/sets/CSV-01");
+    expect(set.items.find((i) => i.original_filename === "yuji.jpg")).toMatchObject({ status: "done", name: "Lu" });
+    expect(set.items.find((i) => i.original_filename === "gojo.jpg").name).toBe("Satoru Gojo");
+    setServices({ readCard: fakeReadCard });
   });
 
   it("refuse de publier tant que tout n'est pas lu, rangé et validé", async () => {
@@ -305,7 +336,7 @@ describe("Workflow d'import", () => {
        VALUES ('JJK01-R-001', 'Sukuna', 'JJK-01', '001', 'R', '/images/photo01_carte01.webp'),
               ('JJK01-R-002', 'Panda', 'JJK-01', '002', 'R', '/images/photo01_carte02.webp')`,
     );
-    const upload = await admin("post", "/sets/JJK-01/photos").attach("photos", await png("gojo.jpg"), "gojo.jpg");
+    const upload = await admin("post", "/sets/JJK-01/photos").field("ai", "1").attach("photos", await png("gojo.jpg"), "gojo.jpg");
     await kickQueue();
     const item = upload.body.created[0];
     // Meilleure photo de Sukuna (R-001)
@@ -326,7 +357,7 @@ describe("Workflow d'import", () => {
   it("supprimer un set : refusé tant qu'il est en ligne ou sans confirmation", async () => {
     await admin("post", "/sets").send({ code: "DEL-01", name: "À supprimer", game_code: "DEL-GAME", game_name: "Jeu à supprimer" });
     await admin("put", "/sets/DEL-01/rarities").send({ order: ["R"] });
-    const up = await admin("post", "/sets/DEL-01/photos").attach("photos", await png("yuji.jpg"), "yuji.jpg");
+    const up = await admin("post", "/sets/DEL-01/photos").field("ai", "1").attach("photos", await png("yuji.jpg"), "yuji.jpg");
     await kickQueue();
     await admin("patch", `/items/${up.body.created[0].id}`).send({ name: "X", rarity: "R", number: "1", validated: true });
     expect((await admin("post", "/sets/DEL-01/publish")).status).toBe(200);
