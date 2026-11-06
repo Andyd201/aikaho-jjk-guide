@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { fetchSet, fetchSetCards } from "../api.js";
 import {
-  GAME_KANJI,
   SITE_NAME,
+  gameKanji,
   SITE_URL,
   setFallbackDescription,
   setFallbackTitle,
@@ -93,7 +93,12 @@ function SetPage() {
   }
 
   const path = `/sets/${code}`;
-  const back = <Link to="/" className="back-link">← Tous les sets</Link>;
+  // Fil d'Ariane : retour au jeu du set (à l'accueil tant que le set n'est pas chargé)
+  const back = set ? (
+    <Link to={`/games/${set.game_code}`} className="back-link">← {set.game_name}</Link>
+  ) : (
+    <Link to="/" className="back-link">← Tous les jeux</Link>
+  );
 
   // main.jsx a enlevé les balises par défaut : sans ça, Google verrait une page sans titre
   const fallbackSeo = (
@@ -140,7 +145,7 @@ function SetPage() {
       name: card.name,
     })),
   };
-  const kanji = GAME_KANJI[set.game_code];
+  const kanji = gameKanji(set.game_name);
 
   return (
     <main>
@@ -151,7 +156,7 @@ function SetPage() {
         {kanji && <span className="hero-kanji" aria-hidden="true">{kanji}</span>}
         {back}
         <p className="eyebrow">
-          {set.game_name} · Set {set.code}
+          <Link to={`/games/${set.game_code}`}>{set.game_name}</Link> · Set {set.code}
         </p>
         <h1>
           {set.name} <span>Card List</span>

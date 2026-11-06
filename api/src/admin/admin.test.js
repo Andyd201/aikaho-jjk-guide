@@ -89,7 +89,7 @@ describe("Workflow d'import", () => {
   it("sert l'interface", async () => {
     const res = await request(app).get("/admin/");
     expect(res.status).toBe(200);
-    expect(res.text).toContain("Admin · Guide de cartes");
+    expect(res.text).toContain("Admin · Foreign Card TCG");
   });
 
   it("refuse une requête qui modifie venant d'un autre site (CSRF)", async () => {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router";
+import SetTicker from "../components/SetTicker.jsx";
 import { fetchSets } from "../api.js";
 import { HOME_DESCRIPTION, HOME_TITLE, LEGACY_SET_CODE } from "../config.js";
 import EyesightBanner from "../components/EyesightBanner.jsx";
@@ -7,21 +8,6 @@ import Seo from "../components/Seo.jsx";
 
 // Les anciens liens filtrés pointaient sur la racine (/?q=goj&rarity=ACE) : on garde les filtres
 const LEGACY_PARAMS = ["q", "rarity"];
-
-// « 2026-09-15 » → « 15 sept. 2026 ». On ne garde que la partie date :
-// pas de new Date("2026-09-15") qui recule d'un jour selon le fuseau du visiteur
-const dateFormat = new Intl.DateTimeFormat("fr-CA", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-});
-function formatReleaseDate(value) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value ?? "");
-  if (!match) return null;
-  const [, year, month, day] = match;
-  return dateFormat.format(Date.UTC(year, month - 1, day));
-}
 
 function HomePage() {
   const { search } = useLocation();
@@ -59,17 +45,20 @@ function SetList() {
 
   const description =
     sets.length > 0
-      ? `Complete card lists for anime trading card sets: ${sets.map((set) => set.name).join(", ")}. ` +
+      ? `Card lists for Asian trading card games: ${sets.map((set) => set.name).join(", ")}. ` +
         "Every card with its image, card number and rarity."
       : HOME_DESCRIPTION;
 
   const hero = (
     <header className="hero">
-      <p className="eyebrow">Eyesight Collectibles</p>
+      <p className="eyebrow">Base de cartes</p>
       <h1>
-        Card Guide <span>Anime Trading Card Lists</span>
+        Cartes TCG asiatiques <span>Japon · Corée · Chine</span>
       </h1>
-      <EyesightBanner content="home" />
+      <p className="hero-lead">
+        Toutes les cartes des sets japonais, coréens et chinois : images, numéros et raretés, set par set.
+      </p>
+      <EyesightBanner content="home" text="Boutique partenaire : Eyesight Collectibles" />
     </header>
   );
 
@@ -81,30 +70,17 @@ function SetList() {
     content = games.map((game) => (
       <section key={game.code} className="game" aria-labelledby={`game-${game.code}`}>
         <h2 id={`game-${game.code}`} className="game-title">
-          {game.name}
+          <Link to={`/games/${game.code}`}>{game.name}</Link>
           <span>
             {game.sets.length} {game.sets.length > 1 ? "sets" : "set"}
           </span>
         </h2>
         <ul className="set-list">
-          {game.sets.map((set) => {
-            const date = formatReleaseDate(set.release_date);
-            return (
-              <li key={set.code}>
-                <Link to={`/sets/${set.code}`} className="set-ticker">
-                  <span className="set-code">{set.code}</span>
-                  <span className="set-name">{set.name}</span>
-                  <span className="set-meta">
-                    <span className="set-count">
-                      {set.card_count} {set.card_count > 1 ? "cartes" : "carte"}
-                    </span>
-                    {date && <span className="set-date">Sortie {date}</span>}
-                  </span>
-                  <span className="set-arrow" aria-hidden="true">→</span>
-                </Link>
-              </li>
-            );
-          })}
+          {game.sets.map((set) => (
+            <li key={set.code}>
+              <SetTicker set={set} />
+            </li>
+          ))}
         </ul>
       </section>
     ));

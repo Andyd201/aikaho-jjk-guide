@@ -20,7 +20,7 @@ function shopUrl(url) {
 // campaign : utm_campaign, un par set (ex. jjk-01) pour comparer les sets dans WooCommerce
 function EyesightBanner({ url, content, campaign = "guide", text = "Procure-toi tes cartes chez Eyesight" }) {
   const link = shopUrl(url);
-  link.searchParams.set("utm_source", "guide-jjk");
+  link.searchParams.set("utm_source", "foreigncardtcg");
   link.searchParams.set("utm_medium", "banner");
   link.searchParams.set("utm_campaign", campaign.toLowerCase());
   if (content) {

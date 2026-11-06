@@ -16,9 +16,9 @@ async function getJson(path, { notFoundAsNull = false } = {}) {
   return res.json();
 }
 
-// Sets publiés, déjà triés par jeu par l'API
-export function fetchSets() {
-  return getJson("/sets");
+// Sets publiés, déjà triés par jeu par l'API ; game : seulement ceux d'un jeu
+export function fetchSets(game) {
+  return getJson(game ? `/sets?game=${encodeURIComponent(game)}` : "/sets");
 }
 
 // Un set + ses raretés dans l'ordre ; null si inexistant ou en brouillon
